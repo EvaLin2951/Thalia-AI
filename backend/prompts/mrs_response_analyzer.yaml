@@ -1,0 +1,103 @@
+response_analysis_prompt:
+  name: "mrs_response_analyzer"
+  template: |
+    **User Input:** "{user_input}"
+    **Previous Question:** "{previous_question}"
+
+    Analyze the user's input to determine the next step in the Menopause Rating Scale (MRS) assessment. Always use the previous question as context to help interpret which symptoms are being referred to.
+
+    **Step 1: Exit Detection**
+    - If the user explicitly requests to stop or exit (e.g., "cancel", "exit", "quit", "stop", "end assessment", "I'm done", "no more questions"), set action_type = "emergency_exit" and return next_message: "Assessment ended. Is there anything else you'd like to talk about?"
+    - If the user indicates they want to discuss a different topic or asks general menopause information questions (e.g., "What is menopause?", "What's the difference between perimenopause and menopause?", "What helps hot flashes?", or any question not related to their personal symptoms), set action_type = "exit_intent" and return next_message: "Sounds like you may want to discuss another topic. Would you like to pause the assessment here and focus on that instead? (yes/no)"
+    - If the user brings up topics outside the assessment (other medical conditions, technical issues, weather, general conversation), handle as exit_intent.
+    - Do not classify as exit if the user describes emotional or psychological experiences matching MRS symptoms (such as depression, anxiety, irritability, or mental exhaustion).
+
+    **Step 2: Symptom Identification and Severity Inference**
+    - Identify all MRS symptoms mentioned in the user's input. Use these categories and symptom names (keep spelling and order exactly as shown):
+      - somatic: hot_flashes, heart_discomfort, sleep_problems, joint_muscle_discomfort
+      - psychological: depressive_mood, irritability, anxiety, mental_exhaustion
+      - urogenital: sexual_problems, bladder_problems, vaginal_dryness
+    - Determine severity for each symptom using natural language context, not just keywords. Consider both frequency and impact.
+    - If the user declines or refuses to answer about a specific symptom, record its score as 0 (none).
+
+    **MRS Symptom Categories and Common Expressions**
+
+    **Somatic Symptoms**
+    - **hot_flashes**: hot flash, hot flush, sweating, sudden heat, overheating, heat wave, burning up, flushing
+    - **heart_discomfort**: heart racing, palpitations, heart pounding, chest pain, chest tightness, irregular heartbeat, heart skipping
+    - **sleep_problems**: can't sleep, insomnia, waking up, restless nights, sleep trouble, difficulty falling asleep, tossing and turning, early waking
+    - **joint_muscle_discomfort**: joint pain, aching, stiffness, muscle soreness, body aches, joints hurt, arthritis, morning stiffness
+
+    **Psychological Symptoms**
+    - **depressive_mood**: feeling down, sad, low mood, hopeless, tearful, blue, despair, empty feeling, worthless
+    - **irritability**: irritable, annoyed, short temper, snappy, easily frustrated, grumpy, impatient, quick to anger
+    - **anxiety**: anxious, worried, nervous, stressed, on edge, panic, restless, tense, fearful
+    - **mental_exhaustion**: tired all the time, brain fog, foggy, memory issues, can't concentrate, forgetful, mental fatigue, difficulty focusing
+
+    **Urogenital Symptoms**
+    - **sexual_problems**: loss of interest, low libido, sexual discomfort, intimacy issues, sex life, desire, painful intercourse, arousal issues
+    - **bladder_problems**: frequent urination, urgency, bladder control, leaking, incontinence, bathroom trips, weak bladder
+    - **vaginal_dryness**: dryness, painful sex, vaginal discomfort, discomfort during intercourse, lack of lubrication, burning sensation
+
+    **Severity Scoring Guide**
+    | Score | Severity Level  | Common User Expressions                                 |
+    |-------|-----------------|--------------------------------------------------------|
+    | 0     | None            | no, none, not at all, never, not experiencing this     |
+    | 1     | Mild            | mild, a little, sometimes, manageable, minor, not too bad, occasional, barely noticeable |
+    | 2     | Moderate        | moderate, somewhat, bothers me, noticeable, troublesome, annoying, interferes sometimes |
+    | 3     | Severe          | very bad, hard to cope, major problem, really bad, significantly affects, challenging |
+    | 4     | Very severe     | unbearable, can't function, ruins my day, overwhelming, completely disruptive, devastating, crippling |
+
+    **Step 3: Clarity and Clarification**
+    - If severity for each mentioned symptom can be confidently determined, record the score.
+    - If severity is unclear or missing for any mentioned symptom, generate a warm, natural follow-up question for clarification, using clear examples.
+    - Only ask for severity clarification if the symptom is mentioned.
+    - Do not display numerical scores to the user.
+
+    **Step 4: Next Message Generation**
+
+    - For emergency_exit, set next_message to: "I completely understand. Thanks for sharing what you were comfortable with. I've cleared your information, so if you ever want to start fresh in the future, just let me know. Is there anything else I can help you with today?"
+
+    - For exit_intent, set next_message to: "Sounds like you may want to discuss another topic. Would you like to pause the assessment here and focus on that instead? (yes/no)"
+
+    - For severity_clear, use natural, conversational acknowledgments that sound like a caring doctor speaking in person. Vary significantly each time and tailor to the context of the specific symptom. Examples:
+      * "Okay, I understand."
+      * "That sounds really challenging."
+      * "I can see how that would affect you."
+      * "That makes sense given what you're going through."
+      * "I hear that it's been quite difficult."
+      * "That sounds manageable for now."
+      * "I can imagine how frustrating that must be."
+      * "That level sounds about right for what you're describing."
+      * "I see what you mean."
+      * "That gives me a good picture of what you're experiencing."
+
+    - For severity_unclear, use casual, conversational follow-up questions that feel natural and varied. Integrate the actual symptom name into the phrasing rather than quoting templates directly. Examples:
+      * "How bad would you say that [symptom] gets?"
+      * "Is that [symptom] something that really bothers you, or more of a minor thing?"
+      * "Would you say that [symptom] is pretty mild, or does it really get in the way?"
+      * "How much is that [symptom] affecting you day to day?"
+      * "Is that [symptom] manageable for you, or is it pretty tough to deal with?"
+      * "Would you describe that [symptom] as barely noticeable, or is it quite bothersome?"
+      * "How intense would you say that [symptom] is for you?"
+      * "Is that [symptom] just a minor annoyance, or something more significant?"
+      * "How much would you say that [symptom] disrupts your daily routine?"
+      * "Would you call that [symptom] mild, moderate, or pretty severe?"
+
+    - When user declines to answer about symptoms: "I completely understand if you'd prefer not to discuss certain topics. That's perfectly fine — I'll note that you'd rather not share about that area."
+
+    - When user corrects earlier information: "I've updated that in your profile."
+
+    **Important:** 
+    - When mentioning symptoms in messages, use normal spelling without underscores (e.g., "joint muscle discomfort" not "joint_muscle_discomfort").
+    - Do not include phrases like "Thank you" or "If there's anything more you'd like to share, I'm here to listen."
+    - For both severity_clear and severity_unclear cases, example sentences should always be adapted to the specific symptom and user context. Avoid directly copying templates — use them as inspiration for natural, situational responses.
+
+    **Return your response as JSON format:**
+    {
+      "symptoms_scored": [
+        {"symptom": "symptom_name", "mrs_score": 0-4}
+      ],
+      "action_type": "emergency_exit|exit_intent|severity_clear|severity_unclear",
+      "next_message": "Your message here"
+    }

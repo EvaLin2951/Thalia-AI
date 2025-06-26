@@ -1,0 +1,73 @@
+scoring_calculator_prompt:
+  name: "mrs_scoring_calculator"
+  template: |
+    **User Records:** "{user_records}"
+
+    Calculate the Menopause Rating Scale (MRS) total score and provide a clear, supportive interpretation similar to how a clinician would explain results to a patient.
+
+    **Step 1: Calculate Scores**
+    - The user_records dictionary contains severity scores (0-4) for each of the following symptoms:
+      - somatic: hot_flashes, heart_discomfort, sleep_problems, joint_muscle_discomfort
+      - psychological: depressive_mood, irritability, anxiety, mental_exhaustion
+      - urogenital: sexual_problems, bladder_problems, vaginal_dryness
+    - For each domain, sum the symptoms to get somatic_score, psychological_score, and urogenital_score.
+    - The total_score is the sum of all symptoms (range: 0-44).
+
+    **Step 2: Interpret the Score**
+    - Use these interpretation levels (based on research):
+      * 0-11: Asymptomatic (mild or no symptoms; treatment is usually not necessary)
+      * 12-35: Mild to moderate symptoms (symptoms are present but may not severely affect quality of life)
+      * 36-44: Severe to very severe symptoms (symptoms have a major impact on daily life)
+    - A total score of 14 or higher may suggest treatment should be considered.
+
+    **Step 3: Write a Supportive, Clinician-Like Explanation**
+    Use a natural, supportive tone that sounds like a real doctor speaking directly to the user. Avoid overly formal or repetitive language. Keep the explanation clear, concise, and reassuring.
+
+    Structure the interpretation as follows:
+
+    1. Start with a brief, conversational summary of the total score.  
+       - Normalize the result in everyday language  
+       - If the score is above the treatment threshold of 14, suggest that supportive steps could help
+
+    2. Write one short paragraph for each of the following domains:  
+       - 🌡️ **Somatic Symptoms**  
+       - 😔 **Psychological Symptoms**  
+       - 💧 **Urogenital Symptoms**
+
+       Each paragraph should:  
+       - Summarize the most prominent symptom in that category  
+       - Follow with one or two useful, informative details (e.g., possible causes, patterns, or day-to-day effects)
+
+    3. End with a friendly, encouraging message.  
+       - Reassure the user that these symptoms are manageable  
+       - Emphasize that support is available and they’re not alone in this
+
+    Use double line breaks between all paragraphs to improve readability.
+
+
+    - Clearly state the user's total score, the range it falls in, and what that means for their daily life.
+    - Mention if the score is near or above the treatment threshold (14).
+    - Briefly summarize which domain(s) contribute most to the score.
+    - Note if any symptom or domain is especially high or low.
+    - Encourage healthy lifestyle changes and reassure the user that support is available.
+    - The explanation should be professional, gentle, and similar to how a doctor would talk to a patient—warm, direct, and easy to understand.
+    
+    In the interpretation field, structure your response in this format:
+    1. Start with a summary sentence such as:
+       "Based on your responses, your total MRS score is 29 out of 44, placing you in the mild to moderate symptom range."
+       Mention whether the score is above the treatment threshold of 14.
+    2. Then write 3 separate paragraphs using emoji + bolded Markdown headings:
+       🌡️ **Somatic Symptoms:** summarize physical discomfort like hot flashes or joint pain
+       😔 **Psychological Symptoms:** explain emotional or mental health symptoms like anxiety or fatigue
+       💧 **Urogenital Symptoms:** discuss sexual or bladder-related concerns
+    3. End with a supportive, encouraging message, reassuring the user that options and help are available.
+    Use double line breaks between all parts to improve readability.
+
+    **Return your response as JSON format:**
+    {
+      "total_score": overall_total,
+      "somatic_score": somatic_total,
+      "psychological_score": psychological_total,
+      "urogenital_score": urogenital_total,
+      "interpretation": "Your explanation here"
+    }

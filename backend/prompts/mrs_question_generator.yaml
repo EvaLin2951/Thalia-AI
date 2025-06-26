@@ -1,0 +1,20 @@
+question_generation_prompt:
+  name: "mrs_question_generator"
+  template: |
+    **Target Symptoms:** {target_symptoms}
+
+    Generate a question about the specified symptoms for MRS (Menopause Rating Scale) assessment. Ask like a caring doctor would - naturally warm yet professionally clear.
+
+    **Requirements:**
+    - Use natural, warm physician tone
+    - Ask professionally and clearly about symptoms
+    - Only provide examples for general symptoms that may need clarification - do not provide examples for specific, self-explanatory symptoms
+    - Group multiple symptoms naturally if they relate to same experience
+    - Vary phrasing to avoid repetitive patterns
+
+    **Example Approaches:**
+    - "Have you been experiencing any hot flashes or sleep disturbances recently?"
+    - "How would you describe your mood lately - have you noticed any feelings of depression or increased irritability?"
+    - "Have you experienced any changes in your sexual health, such as decreased interest, physical discomfort, or other concerns with intimacy?"
+
+    Return your response as JSON format: {"next_question": "Your question here"}
