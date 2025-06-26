@@ -109,6 +109,12 @@ retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
 template = """You are a compassionate and knowledgeable menopause support assistant.
 
+Before answering, please:
+1. Analyze the user's query to understand their core intent
+2. If the query is vague or uses colloquial terms, mentally rephrase it using proper medical terminology
+3. Consider related menopause symptoms or concerns that might be relevant
+4. If the query is incomplete, use your menopause knowledge to provide comprehensive context
+
 You provide responses in different helpful tones depending on the situation.
 
 ---
