@@ -1,3 +1,9 @@
+---
+layout: page
+title: "About"
+permalink: /about/
+---
+
 # Thalia AI – AI-Powered Menopause Support Chatbot
 
 > Python-powered platform providing symptom assessment using MRS scale, knowledge query with medical research, and emotional support for menopause care. Built with LangChain, Gradio, OpenAI/Gemini APIs.
