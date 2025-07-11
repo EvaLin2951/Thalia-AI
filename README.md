@@ -1,6 +1,7 @@
-# 🦋 Thalia - Menopause Support Platform
+# Thalia AI – AI-Powered Menopause Support Chatbot
 
 > Python-powered platform providing symptom assessment using MRS scale, knowledge query with medical research, and emotional support for menopause care. Built with LangChain, Gradio, OpenAI/Gemini APIs.
+
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![Gradio](https://img.shields.io/badge/Gradio-UI-orange.svg)](https://gradio.app)
@@ -20,7 +21,11 @@
 
 ## 🌟 Overview
 
-Thalia is an AI-powered menopause support platform designed to provide evidence-based education, symptom assessment, and emotional support for women navigating menopause. The platform combines medical research with personalized AI assistance to create a comprehensive support system.
+Thalia AI was initiated during the 2025 AI4Good Lab at Mila - Quebec Artificial Intelligence Institute, based on an idea co-pitched by Eva (Yifan) Lin and Paria Jafarian, and developed in collaboration with KK (Jieqi) Luo, Ameline Ramesan, Sabia Irfan, and Qi Zeng.
+
+The project explores how conversational AI can support individuals experiencing menopause — guiding users through symptom reflection and assessment, providing trusted answers grounded in medical research, and offering empathetic emotional support tailored to their experiences.
+
+We’re continuing to grow Thalia beyond the lab, with ongoing efforts to expand its capabilities, enhance the user experience, and build a more inclusive, accessible support tool.
 
 ### Key Capabilities
 
