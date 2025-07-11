@@ -1,50 +1,58 @@
 ---
-layout: home
-title: "Welcome to Thalia AI"
+layout: default
+title: Home
+nav_order: 1
+description: "Thalia AI - AI-Powered Menopause Support Platform"
+permalink: /
 ---
 
-<div style="text-align: center; margin-bottom: 2rem;">
-  <h1 style="color: #6a4c93; font-size: 2.5rem; margin-bottom: 0.5rem;">🌸 Thalia AI</h1>
-  <h2 style="color: #8b5a91; font-size: 1.5rem; font-weight: 300;">AI-Powered Menopause Support Platform</h2>
-</div>
+# Welcome to Thalia AI
+{: .fs-9 }
 
-<!--more-->
+**AI-Powered Menopause Support Platform**
+{: .fs-6 .fw-300 }
 
-> **Empowering women with evidence-based menopause care through compassionate AI assistance.**
+Thalia AI is a conversational support system for individuals going through menopause, providing:
+
+- 🔍 **Symptom Assessment** using validated MRS scale
+- 💡 **Knowledge Base** with medical research
+- 💝 **Emotional Support** through AI conversation
+- 🔐 **Privacy-First** secure platform
+
+[Learn More About Our Team](about){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[View on GitHub](#){: .btn .btn-outline .fs-5 .mb-4 .mb-md-0 }
 
 ---
 
 ## 🌟 What We Offer
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+### 🔍 Intelligent Symptom Assessment
+- **MRS Scale Integration**: Clinical-grade menopause rating scale
+- **Personalized Scoring**: Automated assessment with detailed feedback
+- **Progress Tracking**: Historical symptom monitoring
+- **Medical Recommendations**: Evidence-based guidance
 
-<div style="padding: 1.5rem; border-left: 4px solid #6a4c93; background: #f8f9fa;">
-<h3>🔍 Symptom Assessment</h3>
-<p>Validated MRS (Menopause Rating Scale) for accurate symptom tracking and personalized insights.</p>
-</div>
+### 💡 Knowledge Query System
+- **RAG Pipeline**: Retrieval-Augmented Generation for medical accuracy
+- **Research-Backed**: Current menopause research and guidelines
+- **Natural Language**: Easy-to-understand explanations
+- **Citation Support**: Transparent source referencing
 
-<div style="padding: 1.5rem; border-left: 4px solid #8b5a91; background: #f8f9fa;">
-<h3>💡 Knowledge Base</h3>
-<p>Research-backed information and answers to your menopause questions, powered by medical literature.</p>
-</div>
+### 💝 Emotional Support
+- **Empathetic AI**: Conversational emotional support
+- **Crisis Detection**: Identification of distress signals
+- **Coping Strategies**: Practical mental health tools
+- **Community Connection**: Resource sharing and support
 
-<div style="padding: 1.5rem; border-left: 4px solid #c589e8; background: #f8f9fa;">
-<h3>💝 Emotional Support</h3>
-<p>Empathetic AI conversations providing emotional guidance and coping strategies.</p>
-</div>
-
-<div style="padding: 1.5rem; border-left: 4px solid #ffd23f; background: #f8f9fa;">
-<h3>🔐 Privacy-First</h3>
-<p>GDPR compliant platform with secure authentication and granular privacy controls.</p>
-</div>
-
-</div>
+### 🔐 Privacy & Security
+- **GDPR Compliant**: Privacy-first data handling
+- **Secure Authentication**: Encrypted user sessions
+- **Consent Management**: Granular privacy controls
+- **Data Minimization**: Only necessary data collection
 
 ---
 
 ## 🚀 Quick Start Guide
-
-<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 10px; margin: 2rem 0;">
 
 ### Ready to begin your journey?
 
@@ -54,11 +62,13 @@ title: "Welcome to Thalia AI"
 4. **❓ Ask Questions** - Get evidence-based answers about menopause
 5. **💬 Emotional Support** - Access compassionate AI when you need it
 
-</div>
-
 ---
 
 ## 🏥 Clinical Foundation
+{: .text-center }
+
+🏥 **Clinical Foundation**
+{: .fs-7 .fw-700 }
 
 Thalia AI is built on **validated medical research** and incorporates:
 
@@ -70,21 +80,23 @@ Thalia AI is built on **validated medical research** and incorporates:
 ---
 
 ## 🔬 About Our Research
+{: .text-center }
+
+🔬 **About Our Research**
+{: .fs-7 .fw-700 }
 
 **Developed at Mila - Quebec AI Institute** during the 2025 AI4Good Lab, Thalia AI represents cutting-edge research in healthcare AI, focusing on women's health equity and accessible menopause support.
 
-<div style="text-align: center; margin: 2rem 0;">
-  <a href="{{ site.baseurl }}/about" style="background: #6a4c93; color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block;">
-    🎯 Learn More About Our Team & Research
-  </a>
-</div>
+[🎯 Learn More About Our Team & Research](about){: .btn .btn-purple .fs-5 .mb-4 .mb-md-0 }
 
 ---
 
-<div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 10px; margin: 2rem 0;">
-  <h3 style="color: #6a4c93; margin-bottom: 1rem;">💜 Made with Love for Women's Health</h3>
-  <p style="font-style: italic; color: #666;">
-    Thalia empowers women with evidence-based menopause support,<br>
-    combining medical expertise with compassionate AI assistance.
-  </p>
-</div>
+## 💜 Made with Love for Women's Health
+{: .text-center }
+
+💜 **Made with Love for Women's Health**
+{: .fs-7 .fw-700 .text-purple-000 }
+
+*Thalia empowers women with evidence-based menopause support,  
+combining medical expertise with compassionate AI assistance.*
+{: .fs-5 .fw-300 .text-grey-dk-100 }
