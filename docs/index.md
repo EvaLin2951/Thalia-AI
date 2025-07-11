@@ -1,8 +1,3 @@
----
-layout: home
-title: "Home"
----
-
 # Welcome to Thalia AI
 
 **AI-Powered Menopause Support Platform**
