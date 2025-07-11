@@ -1,0 +1,26 @@
+title: "Thalia AI"
+description: "AI-Powered Menopause Support Chatbot"
+baseurl: ""
+url: "https://yourusername.github.io/repository-name"
+
+# 主题选择
+theme: minima
+# 或者使用远程主题
+# remote_theme: pages-themes/minimal@v0.2.0
+
+# 导航菜单
+header_pages:
+  - index.md
+  - about.md
+
+# 插件
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Markdown 处理
+markdown: kramdown
+highlighter: rouge
+
+# 网站设置
+show_excerpts: true
