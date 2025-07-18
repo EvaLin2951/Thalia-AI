@@ -7,7 +7,7 @@
 [![Gradio](https://img.shields.io/badge/Gradio-UI-orange.svg)](https://gradio.app)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#-overview)
 - [Features](#-features)
@@ -19,7 +19,7 @@
 - [Project Structure](#-project-structure)
 - [License](#-license)
 
-## 🌟 Overview
+## 🦋 Overview
 
 Thalia AI was initiated during the 2025 AI4Good Lab at Mila - Quebec Artificial Intelligence Institute, based on an idea co-pitched by Eva (Yifan) Lin and Paria Jafarian, and developed in collaboration with KK (Jieqi) Luo, Ameline Ramesan, Sabia Irfan, and Qi Zeng.
 
@@ -27,61 +27,17 @@ The project explores how conversational AI can support individuals experiencing 
 
 We’re continuing to grow Thalia beyond the lab, with ongoing efforts to expand its capabilities, enhance the user experience, and build a more inclusive, accessible support tool.
 
-### Key Capabilities
+## 🔍 Features
 
-- **Symptom Assessment**: Validated MRS (Menopause Rating Scale) implementation
-- **Knowledge Base**: RAG-powered medical information retrieval
-- **Emotional Support**: AI-driven conversational therapy
-- **User Management**: Secure authentication and conversation history
-- **Multi-Modal Interface**: Web-based chat interface with privacy controls
+- **Symptom Assessment**: Integrates the clinically validated Menopause Rating Scale (MRS) to identify menopausal symptoms and their severity through natural conversation, with smart follow-up that proactively explores related symptoms. Users receive a personalized report and recommendations.
 
-## ✨ Features
+- **Knowledge Query**: Leverages a Retrieval-Augmented Generation (RAG) pipeline to answer more general menopause-related questions, with findings from current research and guidelines rephrased into easy-to-understand explanations.
 
-### 🔍 Intelligent Symptom Assessment
-- **MRS Scale Integration**: Clinical-grade menopause rating scale
-- **Personalized Scoring**: Automated assessment with detailed feedback
-- **Progress Tracking**: Historical symptom monitoring
-- **Medical Recommendations**: Evidence-based guidance
-
-### 💡 Knowledge Query System
-- **RAG Pipeline**: Retrieval-Augmented Generation for medical accuracy
-- **Research-Backed**: Current menopause research and guidelines
-- **Natural Language**: Easy-to-understand explanations
-- **Citation Support**: Transparent source referencing
-
-### 💝 Emotional Support
-- **Empathetic AI**: Conversational emotional support
-- **Crisis Detection**: Identification of distress signals
-- **Coping Strategies**: Practical mental health tools
-- **Community Connection**: Resource sharing and support
-
-### 🔐 Privacy & Security
-- **GDPR Compliant**: Privacy-first data handling
-- **Secure Authentication**: Encrypted user sessions
-- **Consent Management**: Granular privacy controls
-- **Data Minimization**: Only necessary data collection
+- **Emotional Support**: Detects emotional distress and offers thoughtful insights, practical guidance, and trusted resources, with built-in prompts for emergency help when concerning language appears.
 
 ## 🏗️ Architecture
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Gradio UI     │    │   Main Router    │    │   MRS Engine    │
-│   Web Interface │◄──►│ Intent Detection │◄──►│ Symptom Assess  │
-└─────────────────┘    └─────────┬────────┘    └─────────────────┘
-                                 │
-                       ┌─────────▼────────┐    ┌─────────────────┐
-                       │   RAG System     │    │ Authentication  │
-                       │ Knowledge Base   │    │ User Management │
-                       └──────────────────┘    └─────────────────┘
-```
-
-### Core Components
-
-- **UI Layer**: Gradio-based responsive web interface
-- **Flow Router**: Intent classification and conversation management
-- **RAG System**: LangChain-powered knowledge retrieval
-- **Auth System**: Secure user management with conversation persistence
-- **Assessment Engine**: MRS scale implementation and scoring
+![Architecture](docs/architecture.svg)
 
 ## 🚀 Installation
 
