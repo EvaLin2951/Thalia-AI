@@ -1,14 +1,8 @@
-# Thalia AI – AI-Powered Menopause Support Chatbot
+# Thalia AI – AI‑Powered Menopause Support Chatbot
 
-> Python-powered platform providing symptom assessment using MRS scale, knowledge query with medical research, and emotional support for menopause care. Built with LangChain, Gradio, OpenAI/Gemini APIs.
-
-
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
-[![Gradio](https://img.shields.io/badge/Gradio-UI-orange.svg)](https://gradio.app)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+> Python‑powered platform providing symptom assessment with the MRS scale, knowledge query backed by medical research, and emotional support for menopause care.
 
 ## Table of Contents
-
 - [Overview](#-overview)
 - [Features](#-features)
 - [Architecture](#-architecture)
@@ -20,26 +14,21 @@
 - [License](#-license)
 
 ## 🦋 Overview
+Thalia AI was initiated during the 2025 **AI4Good Lab at Mila**, co‑pitched by **Eva (Yifan) Lin** and **Paria Jafarian**, and developed with **KK (Jieqi) Luo**, **Ameline Ramesan**, **Sabia Irfan**, and **Qi Zeng**.
 
-Thalia AI was initiated during the 2025 AI4Good Lab at Mila - Quebec Artificial Intelligence Institute, based on an idea co-pitched by Eva (Yifan) Lin and Paria Jafarian, and developed in collaboration with KK (Jieqi) Luo, Ameline Ramesan, Sabia Irfan, and Qi Zeng.
+The project explores how conversational AI can support individuals experiencing menopause — guiding users through symptom reflection and assessment, providing trusted answers grounded in medical research, and offering empathetic emotional support tailored to their experiences.
 
-The project explores how conversational AI can support individuals experiencing menopause — guiding users through symptom reflection and assessment, providing trusted answers grounded in medical research, and offering empathetic emotional support tailored to their experiences.
-
-We’re continuing to grow Thalia beyond the lab, with ongoing efforts to expand its capabilities, enhance the user experience, and build a more inclusive, accessible support tool.
+We’re continuing to grow Thalia beyond the lab, expanding capabilities, enhancing user experience, and building a more inclusive, accessible support tool.
 
 ![Overview](docs/overview.png)
 
 ## 🔍 Features
-
-- **Symptom Assessment**: Integrates the clinically validated Menopause Rating Scale (MRS) to identify menopausal symptoms and their severity through natural conversation, with smart follow-up that proactively explores related symptoms. Users receive a personalized report and recommendations.
-
-- **Knowledge Query**: Leverages a Retrieval-Augmented Generation (RAG) pipeline to answer more general menopause-related questions, with findings from current research and guidelines rephrased into easy-to-understand explanations.
-
-- **Emotional Support**: Detects emotional distress and offers thoughtful insights, practical guidance, and trusted resources, with built-in prompts for emergency help when concerning language appears.
+- **Symptom Assessment**: Integrates the clinically validated Menopause Rating Scale (MRS) to identify menopausal symptoms and their severity through natural conversation, with smart follow‑up that proactively explores related symptoms. Users receive a personalized report and recommendations.  
+- **Knowledge Query**: Leverages a Retrieval‑Augmented Generation (RAG) pipeline to answer more general menopause‑related questions, with findings from current research and guidelines rephrased into easy‑to‑understand explanations.  
+- **Emotional Support**: Detects emotional distress and offers thoughtful insights, practical guidance, and trusted resources, with built‑in prompts for emergency help when concerning language appears.  
 
 ## 🔀 Architecture
-
-The following diagram illustrates the system architecture of Thalia AI, including the interaction flow from user input to modular response generation.
+The following diagram illustrates the system architecture of Thalia AI, including the interaction flow from user input to modular response generation.
 
 ![Architecture](docs/architecture.svg)
 
