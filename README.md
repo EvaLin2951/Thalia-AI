@@ -35,7 +35,9 @@ We’re continuing to grow Thalia beyond the lab, with ongoing efforts to expand
 
 - **Emotional Support**: Detects emotional distress and offers thoughtful insights, practical guidance, and trusted resources, with built-in prompts for emergency help when concerning language appears.
 
-## 🏗️ Architecture
+## 🔀 Architecture
+
+The following diagram illustrates the system architecture of Thalia AI, including the interaction flow from user input to modular response generation.
 
 ![Architecture](docs/architecture.svg)
 
