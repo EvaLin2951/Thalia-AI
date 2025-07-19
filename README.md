@@ -27,6 +27,8 @@ The project explores how conversational AI can support individuals experiencing 
 
 We’re continuing to grow Thalia beyond the lab, with ongoing efforts to expand its capabilities, enhance the user experience, and build a more inclusive, accessible support tool.
 
+![Overview](docs/overview.png)
+
 ## 🔍 Features
 
 - **Symptom Assessment**: Integrates the clinically validated Menopause Rating Scale (MRS) to identify menopausal symptoms and their severity through natural conversation, with smart follow-up that proactively explores related symptoms. Users receive a personalized report and recommendations.
