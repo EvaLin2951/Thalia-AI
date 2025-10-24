@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thalia — Menopause Rating Scale (MRS)</title>
+  <style>
+    /* ====== Design Tokens ====== */
+    :root{
+      /* brand */
+      --purple: #6a1b9a;              /* brand primary */
+      --purple-accent: #a65cc3;       /* hover/active tint */
+      --blue-accent: #2ba4e0;         /* gradient partner */
+      /* typography sizes (exactly three) */
+      --fs-title: 24px;
+      --fs-body: 15px;
+      --fs-note: 13px;
+      /* typography colors */
+      --ink: #2f2a3a;
+      --ink-muted: #5e566b;
+      --ink-subtle: #7b728a;
+      /* surfaces */
+      --surface: #ffffff;
+      --backdrop: rgba(0,0,0,.4);
+      --row-line: #f3eaf8;
+      /* focus */
+      --focus: rgba(106, 27, 154, 0.25);
+      /* spacing — relaxed & consistent */
+      --gap-header-block: 24px; /* Title -> Instruction */
+      --gap-section: 28px;      /* Instruction -> Progress, Questionnaire -> Source */
+      --gap-tight: 22px;        /* Progress -> Questionnaire (slightly tighter) */
+      --gap-tail: 26px;         /* Source -> Submit */
+    }
+
+    *{ box-sizing: border-box; margin: 0; padding: 0; }
+
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      line-height: 1.7;
+      min-height: 100vh;
+      background: var(--backdrop);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 20px;
+      font-size: var(--fs-body);
+    }
+
+    /* 当在iframe中时，移除背景和padding，让问卷占满空间 */
+    body.in-iframe {
+      background: transparent;
+      backdrop-filter: none;
+      padding: 0;
+      min-height: 100vh;
+      overflow-y: auto;
+      align-items: flex-start;
+    }
+
+    body.in-iframe .container {
+      max-width: 100%;
+      width: 100%;
+      min-height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container{
+      width: 100%; max-width: 980px;
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      overflow: hidden;
+    }
+
+    /* ====== Header (brand gradient, no bottom border) ====== */
+    .header{
+      padding: 46px 40px; /* taller for relaxed breathing */
+      background: linear-gradient(135deg, #f5d8f0, #d0e8f8);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      position: relative;
+    }
+    .title{
+      font-size: var(--fs-title); font-weight: 600; letter-spacing:.2px; line-height:1.25;
+      color: var(--purple);
+    }
+    .close-btn{
+      appearance:none; border:none; background:transparent; cursor:pointer;
+      font-size: 28px; line-height:1; color: var(--purple); padding:0;
+    }
+    .close-btn:hover{ opacity:.95; transform:scale(1.03); }
+    .close-btn:focus-visible{ outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 8px; }
+
+    /* ====== Instruction (no divider) ====== */
+    .instruction{
+      padding: var(--gap-header-block) 40px 0 40px;
+      color: var(--ink-muted);
+      font-size: var(--fs-body);
+    }
+    .instruction p + p { margin-top: 6px; }
+
+    /* ====== Progress ====== */
+    .progress-wrap{
+      padding: var(--gap-section) 40px 0 40px;
+    }
+    .progress-top{
+      display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px;
+      color: var(--ink-subtle);
+      font-size: var(--fs-body);
+    }
+    .progress-bar{
+      height: 6px; border-radius: 3px; overflow: hidden;
+      background: rgba(106,27,154,0.12);
+    }
+    .progress-fill{
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(135deg, #d946bf, #2ba4e0);
+      transition: width .3s ease;
+    }
+
+    /* ====== Questionnaire ====== */
+    .questionnaire{ padding: var(--gap-tight) 40px 12px 40px; }
+    .scale-header{
+      display:grid; grid-template-columns: 1fr 100px 100px 110px 90px 120px; gap:8px;
+      padding: 16px 20px 14px 20px; align-items:center; margin: 6px 0 8px 0;
+      color: var(--purple);
+      border-bottom: 2px solid var(--purple);
+      background: transparent;
+      font-size: var(--fs-body);
+    }
+    .scale-header > div{ font-weight: 700; text-align:center; letter-spacing:.2px; }
+    .scale-header > div:first-child{ text-align:left; padding-left: 0; } /* exact left align */
+
+    .q-row{
+      display:grid; grid-template-columns: 1fr 100px 100px 110px 90px 120px; gap:8px;
+      padding: 18px 20px; align-items:center;
+      border-bottom: 1px solid var(--row-line);
+      border-radius: 8px; margin-bottom:4px; transition: background .2s ease, transform .2s ease;
+      font-size: var(--fs-body);
+    }
+    .q-row:hover{ background:#fbf8fe; transform: translateX(2px); }
+    .q-row:last-child{ border-bottom:none; }
+
+    .q-text{ color: var(--ink); }
+    .q-num{ color: var(--purple); font-weight: 600; margin-right: 6px; opacity: .9; }
+
+    .cell{ text-align:center; }
+    .opt{
+      display:inline-flex; align-items:center; justify-content:center;
+      width: 28px; height: 28px; border-radius: 50%;
+      margin: 0 auto; position: relative;
+    }
+    .opt input[type="radio"]{
+      appearance: none;
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid #b79ccc;
+      outline: none; cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+      background: #fff;
+    }
+    .opt input[type="radio"]:hover{ transform: scale(1.06); border-color: var(--purple-accent); }
+    .opt input[type="radio"]:focus-visible{ box-shadow: 0 0 0 4px var(--focus); }
+    .opt input[type="radio"]:checked{
+      border-color: var(--purple);
+      background: radial-gradient(circle at 50% 50%, var(--purple) 0 55%, transparent 56% 100%);
+      transform: scale(1.12);
+      box-shadow: 0 0 0 3px var(--focus);
+    }
+
+    .source-note{
+      padding: var(--gap-section) 40px var(--gap-tail) 40px; /* relaxed spacing, left aligned with content */
+      font-size: var(--fs-note); color: var(--ink-subtle);
+      text-align: left;
+    }
+    .source-note a{
+      color: var(--purple); text-decoration: none;
+      border-bottom: 1px dashed rgba(106,27,154,.35);
+    }
+    .source-note a:hover{ text-decoration: underline; }
+
+    /* actions — only Submit */
+    .actions{
+      display:flex; justify-content:center;
+      padding: 20px 40px 32px 40px; background: #fafafa;
+      font-size: var(--fs-body);
+    }
+    .btn{
+      appearance:none; border:none; cursor:pointer;
+      padding: 12px 28px; border-radius: 24px; color:#fff;
+      background: linear-gradient(135deg, #d946bf, #2ba4e0);
+      box-shadow: 0 4px 12px rgba(217,70,191,.25);
+      transition: transform .2s ease, box-shadow .2s ease, filter .2s ease, opacity .2s ease;
+      font-size: var(--fs-body);
+      font-weight: 600; /* bold submit */
+    }
+    .btn:hover:not(:disabled){ transform: translateY(-2px); box-shadow: 0 6px 16px rgba(217,70,191,.35); filter: saturate(1.05); }
+    .btn:active:not(:disabled){ transform: translateY(0); }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; filter: grayscale(10%); }
+
+    @media (max-width: 768px){
+      body{ padding: 20px 10px; }
+      .header{ padding: 40px 24px; }
+      .title{ font-size: 20px; }
+      .instruction{ padding: var(--gap-header-block) 24px 0 24px; }
+      .progress-wrap{ padding: var(--gap-section) 24px 0 24px; }
+      .questionnaire{ padding: var(--gap-tight) 24px 8px 24px; }
+      .scale-header, .q-row{ grid-template-columns: 1fr 64px 64px 86px 70px 92px; gap:6px; padding: 14px 12px; }
+      .actions{ padding: 16px 24px 24px 24px; }
+      .btn{ width: 100%; }
+      .source-note{ padding: var(--gap-section) 24px var(--gap-tail) 24px; }
+    }
+
+    @media print{
+      body{ background:#fff; backdrop-filter:none; }
+      .close-btn, .actions{ display:none !important; }
+      .container{ box-shadow:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header with brand gradient -->
+    <header class="header">
+      <h1 class="title">📋 Let’s check in on how you’ve been feeling ...</h1>
+      <button class="close-btn" aria-label="Exit questionnaire" title="Exit" onclick="confirmExit()">×</button>
+    </header>
+
+    <!-- Instruction -->
+    <section class="instruction">
+      <p>Please select the option that best describes how each symptom applies to you right now.</p>
+      <p>If a symptom doesn’t apply, just choose ‘none.’</p>
+    </section>
+
+    <!-- Progress -->
+    <div class="progress-wrap" aria-hidden="false">
+      <div class="progress-top">
+        <div><span id="progressText">Answered 0/11</span></div>
+        <div><span id="progressPercent">0%</span></div>
+      </div>
+      <div class="progress-bar" aria-label="Completion progress">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Questionnaire -->
+    <form id="mrsForm" class="questionnaire">
+      <div class="scale-header">
+        <div><strong>Symptoms</strong></div>
+        <div><strong>none</strong></div>
+        <div><strong>mild</strong></div>
+        <div><strong>moderate</strong></div>
+        <div><strong>severe</strong></div>
+        <div><strong>very&nbsp;severe</strong></div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="q-row">
+        <div class="q-text"><span class="q-num">1.</span>Hot flushes, sweating (episodes of sweating)</div>
+        <div class="cell"><label class="opt"><input type="radio" name="q1" value="0" aria-label="q1 none"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q1" value="1" aria-label="q1 mild"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q1" value="2" aria-label="q1 moderate"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q1" value="3" aria-label="q1 severe"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q1" value="4" aria-label="q1 very severe"></label></div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="q-row">
+        <div class="q-text"><span class="q-num">2.</span>Heart discomfort (unusual awareness of heartbeat, skipping, racing, tightness)</div>
+        <div class="cell"><label class="opt"><input type="radio" name="q2" value="0" aria-label="q2 none"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q2" value="1" aria-label="q2 mild"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q2" value="2" aria-label="q2 moderate"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q2" value="3" aria-label="q2 severe"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q2" value="4" aria-label="q2 very severe"></label></div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="q-row">
+        <div class="q-text"><span class="q-num">3.</span>Sleep problems (difficulty falling asleep, staying asleep, early awakening)</div>
+        <div class="cell"><label class="opt"><input type="radio" name="q3" value="0" aria-label="q3 none"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q3" value="1" aria-label="q3 mild"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q3" value="2" aria-label="q3 moderate"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q3" value="3" aria-label="q3 severe"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q3" value="4" aria-label="q3 very severe"></label></div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="q-row">
+        <div class="q-text"><span class="q-num">4.</span>Depressive mood (feeling down, sad, lack of drive, mood swings)</div>
+        <div class="cell"><label class="opt"><input type="radio" name="q4" value="0" aria-label="q4 none"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q4" value="1" aria-label="q4 mild"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q4" value="2" aria-label="q4 moderate"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q4" value="3" aria-label="q4 severe"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q4" value="4" aria-label="q4 very severe"></label></div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="q-row">
+        <div class="q-text"><span class="q-num">5.</span>Irritability (feeling nervous, inner tension, feeling aggressive)</div>
+        <div class="cell"><label class="opt"><input type="radio" name="q5" value="0" aria-label="q5 none"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q5" value="1" aria-label="q5 mild"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q5" value="2" aria-label="q5 moderate"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q5" value="3" aria-label="q5 severe"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q5" value="4" aria-label="q5 very severe"></label></div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="q-row">
+        <div class="q-text"><span class="q-num">6.</span>Anxiety (inner restlessness, panic)</div>
+        <div class="cell"><label class="opt"><input type="radio" name="q6" value="0" aria-label="q6 none"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q6" value="1" aria-label="q6 mild"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q6" value="2" aria-label="q6 moderate"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q6" value="3" aria-label="q6 severe"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q6" value="4" aria-label="q6 very severe"></label></div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="q-row">
+        <div class="q-text"><span class="q-num">7.</span>Physical and mental exhaustion (general decrease in performance, impaired memory, concentration, forgetfulness)</div>
+        <div class="cell"><label class="opt"><input type="radio" name="q7" value="0" aria-label="q7 none"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q7" value="1" aria-label="q7 mild"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q7" value="2" aria-label="q7 moderate"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q7" value="3" aria-label="q7 severe"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q7" value="4" aria-label="q7 very severe"></label></div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="q-row">
+        <div class="q-text"><span class="q-num">8.</span>Sexual problems (change in sexual desire, activity and satisfaction)</div>
+        <div class="cell"><label class="opt"><input type="radio" name="q8" value="0" aria-label="q8 none"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q8" value="1" aria-label="q8 mild"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q8" value="2" aria-label="q8 moderate"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q8" value="3" aria-label="q8 severe"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q8" value="4" aria-label="q8 very severe"></label></div>
+      </div>
+
+      <!-- Q9 -->
+      <div class="q-row">
+        <div class="q-text"><span class="q-num">9.</span>Bladder problems (difficulty in urinating, increased need to urinate, incontinence)</div>
+        <div class="cell"><label class="opt"><input type="radio" name="q9" value="0" aria-label="q9 none"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q9" value="1" aria-label="q9 mild"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q9" value="2" aria-label="q9 moderate"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q9" value="3" aria-label="q9 severe"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q9" value="4" aria-label="q9 very severe"></label></div>
+      </div>
+
+      <!-- Q10 -->
+      <div class="q-row">
+        <div class="q-text"><span class="q-num">10.</span>Dryness of vagina (sensation of dryness or burning in the vagina, difficulty with sexual intercourse)</div>
+        <div class="cell"><label class="opt"><input type="radio" name="q10" value="0" aria-label="q10 none"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q10" value="1" aria-label="q10 mild"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q10" value="2" aria-label="q10 moderate"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q10" value="3" aria-label="q10 severe"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q10" value="4" aria-label="q10 very severe"></label></div>
+      </div>
+
+      <!-- Q11 -->
+      <div class="q-row">
+        <div class="q-text"><span class="q-num">11.</span>Joint and muscular discomfort (pain in the joints, rheumatic complaints)</div>
+        <div class="cell"><label class="opt"><input type="radio" name="q11" value="0" aria-label="q11 none"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q11" value="1" aria-label="q11 mild"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q11" value="2" aria-label="q11 moderate"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q11" value="3" aria-label="q11 severe"></label></div>
+        <div class="cell"><label class="opt"><input type="radio" name="q11" value="4" aria-label="q11 very severe"></label></div>
+      </div>
+
+      <!-- source note at end (left aligned, relaxed spacing) -->
+      <div class="source-note">
+        The Menopause Rating Scale (MRS) is an internationally validated scale used in clinical research to assess symptoms and health-related quality of life in menopausal women. This self-assessment is intended for informational purposes and does not replace professional medical evaluation.
+        <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC516787/" target="_blank" rel="noopener" aria-label="Read the MRS methodological study on NIH">↗</a>
+      </div>
+    </form>
+
+    <!-- Single Submit button -->
+    <div class="actions">
+      <button id="submitBtn" class="btn" type="button" onclick="submitToHost()" disabled>Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_Q = 11;
+
+    // 检测是否在iframe中，如果是则添加特殊样式
+    if (window.self !== window.top) {
+      document.body.classList.add('in-iframe');
+    }
+
+    function tryClose(){
+      if (window.close) window.close();
+      if (history.length > 1) history.back();
+    }
+
+    function confirmExit(){
+      const ok = confirm("Exit the questionnaire?\nYour current selections will not be saved.");
+      if (ok) tryClose();
+    }
+
+    // Progress calculation + submit gating
+    function updateProgress(){
+      const form = document.getElementById('mrsForm');
+      let answered = 0;
+      for(let i=1;i<=TOTAL_Q;i++){
+        if (form.querySelector('input[name="q'+i+'"]:checked')) answered++;
+      }
+      const pct = Math.round((answered / TOTAL_Q) * 100);
+      document.getElementById('progressText').textContent = `Answered ${answered}/${TOTAL_Q}`;
+      document.getElementById('progressPercent').textContent = `${pct}%`;
+      document.getElementById('progressFill').style.width = pct + '%';
+
+      // Disable submit unless all answered
+      document.getElementById('submitBtn').disabled = answered !== TOTAL_Q;
+    }
+
+    document.addEventListener('change', (e) => {
+      if (e.target && e.target.matches('input[type="radio"]')){
+        updateProgress();
+      }
+    });
+
+    // Submit to host (Gradio parent/opener)
+    function submitToHost(){
+      // 显示提交中状态
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = '提交中...';
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.6';
+      submitBtn.style.cursor = 'wait';
+      
+      const form = document.getElementById('mrsForm');
+      const payload = {};
+      for(let i=1;i<=TOTAL_Q;i++){
+        const picked = form.querySelector('input[name="q'+i+'"]:checked');
+        payload['q'+i] = picked ? Number(picked.value) : null;
+      }
+      const message = { type: 'MRS_SUBMIT', data: payload, timestamp: Date.now() };
+      try {
+        if (window.parent && window.parent !== window){
+          window.parent.postMessage(message, '*');
+        } else if (window.opener){
+          window.opener.postMessage(message, '*');
+        }
+      } catch (err){ 
+        console.warn('postMessage failed:', err);
+        // 如果发送失败，恢复按钮状态
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+        alert('提交失败，请重试');
+        return;
+      }
+      
+      // 显示成功状态
+      submitBtn.textContent = '✓ 已提交';
+      submitBtn.style.background = 'linear-gradient(135deg, #4caf50, #81c784)';
+      
+      // 不要立即关闭，让主界面控制关闭
+      // 如果在独立窗口中打开，延迟后再关闭
+      if (window.opener || (window.parent && window.parent !== window)) {
+        // 在iframe或弹出窗口中，等待主界面关闭
+        console.log('Data sent to parent, waiting for parent to close...');
+      } else {
+        // 独立窗口模式，延迟关闭给用户反馈
+        setTimeout(() => {
+          alert('问卷已提交！感谢您的参与。');
+          tryClose();
+        }, 500);
+      }
+    }
+
+    // initial
+    updateProgress();
+  </script>
+</body>
+</html>
