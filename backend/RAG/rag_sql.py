@@ -9,15 +9,11 @@ import sys
 # print("----------------------------\n")
 
 
-# 获取当前脚本的绝对路径
+# to get current pathway
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# 计算项目根目录 (Thalia) 的路径
-# current_script_dir 是 /Users/.../Thalia/RAG
-# current_script_dir 的上一级是 /Users/.../Thalia
 project_root_dir = os.path.join(current_script_dir, "..")
 
-# 将项目根目录添加到 Python 的模块搜索路径
 sys.path.append(project_root_dir)
 
 
