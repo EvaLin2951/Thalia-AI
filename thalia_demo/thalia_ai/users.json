@@ -1,0 +1,88 @@
+{
+  "users": [
+    {
+      "id": "user_001",
+      "email": "sarah.chen@example.com",
+      "password": "demo123",
+      "name": "Sarah Chen",
+      "age": 52,
+      "profile": {
+        "baseline_completed": true,
+        "baseline_date": "2024-08-15",
+        "baseline_score": {
+          "totalScore": 18,
+          "severity": "Moderate",
+          "psychologicalScore": 6,
+          "somaticScore": 8,
+          "urogenitalScore": 4
+        }
+      }
+    },
+    {
+      "id": "user_002",
+      "email": "emma.wilson@example.com",
+      "password": "demo123",
+      "name": "Emma Wilson",
+      "age": 48,
+      "profile": {
+        "baseline_completed": true,
+        "baseline_date": "2024-09-01",
+        "baseline_score": {
+          "totalScore": 12,
+          "severity": "Moderate",
+          "psychologicalScore": 4,
+          "somaticScore": 5,
+          "urogenitalScore": 3
+        }
+      }
+    },
+    {
+      "id": "user_003",
+      "email": "maria.garcia@example.com",
+      "password": "demo123",
+      "name": "Maria Garcia",
+      "age": 55,
+      "profile": {
+        "baseline_completed": true,
+        "baseline_date": "2024-07-20",
+        "baseline_score": {
+          "totalScore": 22,
+          "severity": "Severe",
+          "psychologicalScore": 8,
+          "somaticScore": 10,
+          "urogenitalScore": 4
+        }
+      }
+    },
+    {
+      "id": "user_004",
+      "email": "lisa.taylor@example.com",
+      "password": "demo123",
+      "name": "Lisa Taylor",
+      "age": 50,
+      "profile": {
+        "baseline_completed": true,
+        "baseline_date": "2024-10-01",
+        "baseline_score": {
+          "totalScore": 8,
+          "severity": "Mild",
+          "psychologicalScore": 3,
+          "somaticScore": 3,
+          "urogenitalScore": 2
+        }
+      }
+    },
+    {
+      "id": "user_005",
+      "email": "jennifer.lee@example.com",
+      "password": "demo123",
+      "name": "Jennifer Lee",
+      "age": 51,
+      "profile": {
+        "baseline_completed": false,
+        "baseline_date": null,
+        "baseline_score": null
+      }
+    }
+  ]
+}

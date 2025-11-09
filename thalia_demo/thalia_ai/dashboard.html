@@ -1,0 +1,1995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Thalia</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --purple: #6a1b9a;
+      --purple-light: #a65cc3;
+      --purple-bg: #f5f0f8;
+      --blue-accent: #2ba4e0;
+      --ink: #2f2a3a;
+      --ink-muted: #5e566b;
+      --surface: #ffffff;
+      --border: #e8e4ee;
+      --shadow: rgba(106, 27, 154, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #fef5fb 0%, #f0f8fc 100%);
+      min-height: 100vh;
+      display: flex;
+      color: var(--ink);
+    }
+
+    .sidebar {
+      width: 240px;
+      background: white;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+    }
+
+    .sidebar-logo {
+      padding: 0 20px;
+      margin-bottom: 32px;
+    }
+
+    .sidebar-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--purple);
+      font-family: 'Arial Narrow', Arial, sans-serif;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+    }
+
+    .nav-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      color: var(--ink-muted);
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      flex-shrink: 0;
+    }
+
+    .nav-item:hover {
+      background: var(--purple-bg);
+      color: var(--purple);
+    }
+
+    .nav-item.active {
+      background: var(--purple-bg);
+      color: var(--purple);
+      border-left-color: var(--purple);
+      font-weight: 600;
+    }
+
+    .user-info {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .user-info:hover {
+      background: var(--purple-bg);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d946bf, #2ba4e0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .user-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-email {
+      font-size: 12px;
+      color: var(--ink-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .main-container {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    .log-button {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #d946bf, #2ba4e0);
+      border: none;
+      border-radius: 50px;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(217, 70, 191, 0.3);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .log-button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .log-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(217, 70, 191, 0.4);
+    }
+
+    .log-button:active {
+      transform: translateY(0);
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 12px var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .card-header {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .card-header-text {
+      flex: 1;
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--purple);
+      margin-bottom: 4px;
+    }
+
+    .card-subtitle {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+
+    .card-icon {
+      font-size: 24px;
+    }
+
+    .controls-section {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      height: 34px;
+      line-height: 1;
+    }
+
+    /* View Selector Buttons */
+    .view-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .view-btn {
+      padding: 8px 16px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      color: var(--ink-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-btn:hover {
+      border-color: var(--purple-light);
+      background: var(--purple-bg);
+    }
+
+    .view-btn.active {
+      background: var(--purple);
+      color: white;
+      border-color: var(--purple);
+    }
+
+    /* Navigation Control - Positioned below chart */
+    .navigation-control {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 16px;
+      padding: 12px;
+    }
+
+    .nav-arrow {
+      background: none;
+      border: none;
+      color: var(--ink-muted);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+      transition: color 0.2s;
+      font-weight: 600;
+    }
+
+    .nav-arrow:hover:not(:disabled) {
+      color: var(--purple);
+    }
+
+    .nav-arrow:disabled {
+      color: #d0d0d0;
+      cursor: not-allowed;
+    }
+
+    .nav-date-range {
+      font-size: 13px;
+      color: var(--ink-muted);
+      min-width: 280px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .symptom-selection {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .symptom-category {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .symptom-category-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 120px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      height: 34px;
+      line-height: 1;
+    }
+
+    .symptom-category-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      flex: 1;
+    }
+
+    .symptom-pills {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .symptom-pill {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid var(--border);
+      background: white;
+      color: var(--ink-muted);
+      position: relative;
+    }
+
+    .symptom-pill.selected {
+      background: var(--purple);
+      color: white;
+      border-color: var(--purple);
+    }
+
+    .symptom-pill.highlighted {
+      box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .symptom-pill:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .symptom-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .badge-event {
+      background: #ffe0e6;
+      color: #c41e3a;
+    }
+
+    .badge-daily {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .badge-weekly {
+      background: #f0e7ff;
+      color: #7c3aed;
+    }
+
+    .symptom-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--purple);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: color 0.2s;
+    }
+
+    .link-btn:hover {
+      color: var(--purple-light);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 450px;
+      margin-top: 20px;
+    }
+
+    .chart-info {
+      font-size: 12px;
+      color: var(--ink-muted);
+      text-align: center;
+      margin-top: 12px;
+      padding: 8px;
+      background: var(--purple-bg);
+      border-radius: 6px;
+    }
+
+    .chart-info strong {
+      color: var(--purple);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--ink-muted);
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-text {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .insight-card {
+      background: var(--purple-bg);
+      border-radius: 12px;
+      padding: 24px;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+    }
+
+    .insight-card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--purple);
+      margin-bottom: 16px;
+    }
+
+    .insight-card-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink-muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 1024px) {
+      .control-row {
+        grid-template-columns: 1fr;
+      }
+
+      .insight-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-title">THALIA</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html" class="nav-item">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        Chat
+      </a>
+      <a href="dashboard.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        Dashboard
+      </a>
+    </nav>
+    <div class="user-info" id="userInfo">
+      <div class="user-avatar">U</div>
+      <div class="user-details">
+        <div class="user-name">User</div>
+        <div class="user-email">user@example.com</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-text">
+          <div class="card-title">Symptom Timeline</div>
+          <div class="card-subtitle">Browse your symptom history</div>
+        </div>
+        <a href="logs.html" class="log-button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          Log
+        </a>
+      </div>
+
+      <div class="controls-section">
+        <!-- View Selector Control -->
+        <div class="control-row">
+          <div class="control-label">Time Scale</div>
+          <div class="view-buttons">
+            <button class="view-btn active" data-view="week">Week</button>
+            <button class="view-btn" data-view="month">Month</button>
+            <button class="view-btn" data-view="6months">6 Months</button>
+            <button class="view-btn" data-view="year">Year</button>
+          </div>
+        </div>
+
+        <!-- Symptom Selection Control -->
+        <div class="control-row">
+          <div class="control-label">Symptoms</div>
+          <div class="symptom-selection">
+            <div class="symptom-pills" id="symptomPills"></div>
+            <div class="symptom-actions">
+              <button class="link-btn" onclick="selectAllSymptoms()">Select All</button>
+              <button class="link-btn" onclick="clearAllSymptoms()">Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="trendChart"></canvas>
+      </div>
+
+      <!-- Navigation Control -->
+      <div class="navigation-control">
+        <button class="nav-arrow" id="prevPeriod" onclick="navigatePeriod(-1)">&lt;</button>
+        <div class="nav-date-range" id="dateRangeDisplay">Loading...</div>
+        <button class="nav-arrow" id="nextPeriod" onclick="navigatePeriod(1)">&gt;</button>
+      </div>
+    </div>
+
+    <!-- Insight Lab Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-text">
+          <div class="card-title">Insight Lab</div>
+          <div class="card-subtitle">See progress, patterns, and alerts derived from your history</div>
+        </div>
+      </div>
+
+      <div class="insight-grid">
+        <!-- Progress Card -->
+        <div class="insight-card">
+          <div class="insight-card-title">Progress</div>
+          <div class="insight-card-content">
+            <!-- Content coming soon -->
+          </div>
+        </div>
+
+        <!-- Pattern Card -->
+        <div class="insight-card">
+          <div class="insight-card-title">Pattern</div>
+          <div class="insight-card-content">
+            <!-- Content coming soon -->
+          </div>
+        </div>
+
+        <!-- Alert Card -->
+        <div class="insight-card">
+          <div class="insight-card-title">Alert</div>
+          <div class="insight-card-content">
+            <!-- Content coming soon -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== Configuration ====================
+    
+    const SYMPTOM_CONFIG = {
+      somatic: [
+        { id: 'hot_flashes', name: 'Hot Flashes / Sweating', type: 'event' },
+        { id: 'heart_discomfort', name: 'Heart Discomfort', type: 'event' },
+        { id: 'sleep_problems', name: 'Sleep Problems', type: 'daily' },
+        { id: 'joint_pain', name: 'Joint / Muscular Discomfort', type: 'daily' }
+      ],
+      psychological: [
+        { id: 'depressive_mood', name: 'Depressive Mood', type: 'daily' },
+        { id: 'irritability', name: 'Irritability', type: 'daily' },
+        { id: 'anxiety', name: 'Anxiety', type: 'daily' },
+        { id: 'exhaustion', name: 'Physical / Mental Exhaustion', type: 'daily' }
+      ],
+      urogenital: [
+        { id: 'bladder_problems', name: 'Bladder Problems', type: 'event' },
+        { id: 'sexual_problems', name: 'Sexual Problems', type: 'weekly' },
+        { id: 'vaginal_dryness', name: 'Vaginal Dryness', type: 'weekly' }
+      ]
+    };
+
+    const ALL_SYMPTOMS = [
+      ...SYMPTOM_CONFIG.somatic,
+      ...SYMPTOM_CONFIG.psychological,
+      ...SYMPTOM_CONFIG.urogenital
+    ];
+
+    // ==================== State ====================
+
+    const DATA_VERSION = '1.1'; // Increment this to force data regeneration
+    let dailyLogs = [];
+    let selectedSymptoms = new Set();
+    let currentView = 'week'; // week | month | 6months | year
+    let currentPeriodStart = null; // Date object for period start
+    let currentPeriodEnd = null;   // Date object for period end
+    let trendChart = null;
+
+    // ==================== Mock Data Generation ====================
+    
+    function generateMockData() {
+      const logs = [];
+      const today = new Date();
+
+      // Generate data for past 120 days
+      for (let i = 0; i < 120; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+
+        // Process all symptoms by type
+        ALL_SYMPTOMS.forEach(symptom => {
+          if (symptom.type === 'event') {
+            // Always generate data (100% chance) for more consistent testing
+            logs.push({
+              date: dateStr,
+              symptom_id: symptom.id,
+              symptom_name: symptom.name,
+              type: 'event',
+              d_evt_count: Math.floor(Math.random() * 5),
+              d_evt_sev_max: Math.floor(Math.random() * 5),
+              d_sev: null,
+              w_anchor_sev: null
+            });
+          } else if (symptom.type === 'daily') {
+            // Always generate data (100% chance) for more consistent testing
+            logs.push({
+              date: dateStr,
+              symptom_id: symptom.id,
+              symptom_name: symptom.name,
+              type: 'daily',
+              d_evt_count: null,
+              d_evt_sev_max: null,
+              d_sev: Math.floor(Math.random() * 5),
+              w_anchor_sev: null
+            });
+          }
+        });
+      }
+
+      // Weekly diary symptoms - only on Sundays
+      for (let i = 0; i < 120; i += 7) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+
+        // Align to Sunday
+        const dayOfWeek = date.getDay();
+        date.setDate(date.getDate() - dayOfWeek);
+        const dateStr = date.toISOString().split('T')[0];
+
+        ALL_SYMPTOMS.forEach(symptom => {
+          if (symptom.type === 'weekly') {
+            // Always generate data (100% chance) for more consistent testing
+            // Generate 1-4 instead of 0-4 to ensure visibility
+            logs.push({
+              date: dateStr,
+              symptom_id: symptom.id,
+              symptom_name: symptom.name,
+              type: 'weekly',
+              d_evt_count: null,
+              d_evt_sev_max: null,
+              d_sev: null,
+              w_anchor_sev: Math.floor(Math.random() * 4) + 1
+            });
+          }
+        });
+      }
+
+      return logs;
+    }
+
+    // ==================== Burden Calculation ====================
+    
+    function calculateSymptomBurden(logs, symptomId, symptomType, weeks = 4) {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - (weeks * 7));
+      
+      const relevantLogs = logs.filter(log => {
+        const logDate = new Date(log.date);
+        return log.symptom_id === symptomId && logDate >= startDate && logDate <= endDate;
+      });
+      
+      if (symptomType === 'event') {
+        // Event type burden: Σ d_evt_count
+        return relevantLogs.reduce((sum, log) => sum + (log.d_evt_count || 0), 0);
+      } else if (symptomType === 'daily') {
+        // Daily diary burden: Σ d_sev
+        return relevantLogs.reduce((sum, log) => sum + (log.d_sev || 0), 0);
+      } else if (symptomType === 'weekly') {
+        // Weekly diary burden: Σ (w_anchor_sev × days_covered_w)
+        // days_covered_w = 7 for weekly symptoms
+        return relevantLogs.reduce((sum, log) => sum + ((log.w_anchor_sev || 0) * 7), 0);
+      }
+      
+      return 0;
+    }
+
+    function getTop3Symptoms(logs) {
+      const burdens = ALL_SYMPTOMS.map(symptom => ({
+        ...symptom,
+        burden: calculateSymptomBurden(logs, symptom.id, symptom.type)
+      }));
+      
+      // Sort by burden descending and take top 3
+      burdens.sort((a, b) => b.burden - a.burden);
+      return burdens.slice(0, 3).map(s => s.id);
+    }
+
+    // ==================== UI Initialization ====================
+
+    function initializeUI() {
+      renderSymptomPills();
+      setupViewButtons();
+      loadViewPreferences();
+      initializePeriod();
+      setupGestureNavigation();
+      loadData();
+    }
+
+    function setupViewButtons() {
+      const buttons = document.querySelectorAll('.view-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const view = btn.dataset.view;
+          switchView(view);
+        });
+      });
+    }
+
+    function setupGestureNavigation() {
+      const chartContainer = document.querySelector('.chart-container');
+      const navigationControl = document.querySelector('.navigation-control');
+      const swipeAreas = [chartContainer, navigationControl];
+
+      swipeAreas.forEach(area => {
+        let startX = 0;
+        let startY = 0;
+        let isDragging = false;
+
+        // Mouse events
+        area.addEventListener('mousedown', (e) => {
+          startX = e.clientX;
+          startY = e.clientY;
+          isDragging = true;
+          area.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+          if (!isDragging) return;
+          // Optional: Add visual feedback during drag
+        });
+
+        document.addEventListener('mouseup', (e) => {
+          if (!isDragging) return;
+          isDragging = false;
+          area.style.cursor = '';
+
+          const deltaX = e.clientX - startX;
+          const deltaY = Math.abs(e.clientY - startY);
+
+          // Only trigger if horizontal swipe is dominant (not vertical scroll)
+          if (Math.abs(deltaX) > 100 && Math.abs(deltaX) > deltaY * 2) {
+            if (deltaX > 0) {
+              // Swipe right = previous period
+              navigatePeriod(-1);
+            } else {
+              // Swipe left = next period
+              const nextBtn = document.getElementById('nextPeriod');
+              if (!nextBtn.disabled) {
+                navigatePeriod(1);
+              }
+            }
+          }
+        });
+
+        // Touch events
+        area.addEventListener('touchstart', (e) => {
+          const touch = e.touches[0];
+          startX = touch.clientX;
+          startY = touch.clientY;
+        });
+
+        area.addEventListener('touchmove', (e) => {
+          // Prevent default scroll behavior during swipe
+          const touch = e.touches[0];
+          const deltaX = Math.abs(touch.clientX - startX);
+          const deltaY = Math.abs(touch.clientY - startY);
+
+          if (deltaX > deltaY) {
+            e.preventDefault();
+          }
+        }, { passive: false });
+
+        area.addEventListener('touchend', (e) => {
+          const touch = e.changedTouches[0];
+          const deltaX = touch.clientX - startX;
+          const deltaY = Math.abs(touch.clientY - startY);
+
+          // Only trigger if horizontal swipe is dominant
+          if (Math.abs(deltaX) > 100 && Math.abs(deltaX) > deltaY * 2) {
+            if (deltaX > 0) {
+              // Swipe right = previous period
+              navigatePeriod(-1);
+            } else {
+              // Swipe left = next period
+              const nextBtn = document.getElementById('nextPeriod');
+              if (!nextBtn.disabled) {
+                navigatePeriod(1);
+              }
+            }
+          }
+        });
+      });
+    }
+
+    function loadViewPreferences() {
+      const savedView = localStorage.getItem('currentView');
+      const validViews = ['week', 'month', '6months', 'year'];
+      if (savedView && validViews.includes(savedView)) {
+        currentView = savedView;
+      } else {
+        // Default to 'week' if no valid saved preference
+        currentView = 'week';
+      }
+      updateViewButtonsUI();
+    }
+
+    function updateViewButtonsUI() {
+      const buttons = document.querySelectorAll('.view-btn');
+      buttons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === currentView);
+      });
+    }
+
+    function initializePeriod() {
+      // Initialize to current period containing today
+      calculatePeriod(new Date());
+      updateNavigationUI();
+    }
+
+    function renderSymptomPills() {
+      const container = document.getElementById('symptomPills');
+      container.innerHTML = '';
+
+      // Create three rows with category titles and pills on same line
+      const categories = [
+        { title: 'Somatic', symptoms: SYMPTOM_CONFIG.somatic },
+        { title: 'Psychological', symptoms: SYMPTOM_CONFIG.psychological },
+        { title: 'Urogenital', symptoms: SYMPTOM_CONFIG.urogenital }
+      ];
+
+      categories.forEach(category => {
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'symptom-category';
+
+        const title = document.createElement('div');
+        title.className = 'symptom-category-title';
+        title.textContent = category.title;
+        categoryDiv.appendChild(title);
+
+        const row = document.createElement('div');
+        row.className = 'symptom-category-row';
+
+        category.symptoms.forEach(symptom => {
+          const pill = document.createElement('div');
+          pill.className = 'symptom-pill';
+          pill.dataset.symptomId = symptom.id;
+          pill.innerHTML = symptom.name;
+
+          pill.addEventListener('click', () => toggleSymptom(symptom.id));
+          pill.addEventListener('mouseenter', () => highlightSymptom(symptom.id));
+          pill.addEventListener('mouseleave', () => unhighlightSymptom(symptom.id));
+
+          row.appendChild(pill);
+        });
+
+        categoryDiv.appendChild(row);
+        container.appendChild(categoryDiv);
+      });
+    }
+
+    // ==================== Period Calculation ====================
+
+    function calculatePeriod(referenceDate) {
+      const date = new Date(referenceDate);
+
+      switch(currentView) {
+        case 'week':
+          // Find the Monday of the week containing referenceDate
+          const dayOfWeek = date.getDay();
+          const daysFromMonday = (dayOfWeek === 0) ? 6 : dayOfWeek - 1; // If Sunday, go back 6 days
+          const monday = new Date(date);
+          monday.setDate(monday.getDate() - daysFromMonday);
+          currentPeriodStart = new Date(monday);
+          currentPeriodStart.setHours(0, 0, 0, 0);
+
+          currentPeriodEnd = new Date(monday);
+          currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 6);
+          currentPeriodEnd.setHours(23, 59, 59, 999);
+          break;
+
+        case 'month':
+          // First day of the month
+          currentPeriodStart = new Date(date.getFullYear(), date.getMonth(), 1);
+          currentPeriodStart.setHours(0, 0, 0, 0);
+
+          // Last day of the month
+          currentPeriodEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+          currentPeriodEnd.setHours(23, 59, 59, 999);
+          break;
+
+        case '6months':
+          // Past 6 complete months from current month
+          // If today is Nov 2025, show Jun-Nov 2025
+          const endMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0); // Last day of current month
+          const startMonth = new Date(date.getFullYear(), date.getMonth() - 5, 1); // First day of 6 months ago
+
+          currentPeriodStart = startMonth;
+          currentPeriodStart.setHours(0, 0, 0, 0);
+          currentPeriodEnd = endMonth;
+          currentPeriodEnd.setHours(23, 59, 59, 999);
+          break;
+
+        case 'year':
+          // Full calendar year
+          currentPeriodStart = new Date(date.getFullYear(), 0, 1);
+          currentPeriodStart.setHours(0, 0, 0, 0);
+
+          currentPeriodEnd = new Date(date.getFullYear(), 11, 31);
+          currentPeriodEnd.setHours(23, 59, 59, 999);
+          break;
+      }
+    }
+
+    function switchView(newView) {
+      currentView = newView;
+      updateViewButtonsUI();
+
+      // Always reset to current period containing today when switching views
+      calculatePeriod(new Date());
+
+      // Save preference
+      localStorage.setItem('currentView', currentView);
+
+      updateNavigationUI();
+      updateChart();
+    }
+
+    function navigatePeriod(direction) {
+      // direction: -1 for previous, +1 for next
+
+      if (currentView === '6months') {
+        // For 6 months view, directly shift the window by 6 months
+        const newStart = new Date(currentPeriodStart);
+        newStart.setMonth(newStart.getMonth() + (direction * 6));
+
+        const newEnd = new Date(currentPeriodEnd);
+        newEnd.setMonth(newEnd.getMonth() + (direction * 6));
+
+        currentPeriodStart = newStart;
+        currentPeriodEnd = newEnd;
+      } else {
+        // For other views, use calculatePeriod
+        let newDate;
+
+        switch(currentView) {
+          case 'week':
+            newDate = new Date(currentPeriodStart);
+            newDate.setDate(newDate.getDate() + (direction * 7));
+            break;
+
+          case 'month':
+            newDate = new Date(currentPeriodStart);
+            newDate.setMonth(newDate.getMonth() + direction);
+            break;
+
+          case 'year':
+            newDate = new Date(currentPeriodStart);
+            newDate.setFullYear(newDate.getFullYear() + direction);
+            break;
+        }
+
+        calculatePeriod(newDate);
+      }
+
+      updateNavigationUI();
+      updateChart();
+    }
+
+    function updateNavigationUI() {
+      // Update date range display
+      const dateRangeDisplay = document.getElementById('dateRangeDisplay');
+      dateRangeDisplay.textContent = formatPeriodRange();
+
+      // Update button states
+      const prevBtn = document.getElementById('prevPeriod');
+      const nextBtn = document.getElementById('nextPeriod');
+
+      // Previous button is always enabled (we have historical data)
+      prevBtn.disabled = false;
+
+      // Next button: disable if next period would be in the future
+      const nextPeriodInFuture = willNextPeriodBeInFuture();
+      nextBtn.disabled = nextPeriodInFuture;
+    }
+
+    function willNextPeriodBeInFuture() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Calculate what the next period's start would be
+      let nextPeriodStart;
+
+      switch(currentView) {
+        case 'week':
+          nextPeriodStart = new Date(currentPeriodStart);
+          nextPeriodStart.setDate(nextPeriodStart.getDate() + 7);
+          break;
+
+        case 'month':
+          nextPeriodStart = new Date(currentPeriodStart);
+          nextPeriodStart.setMonth(nextPeriodStart.getMonth() + 1);
+          break;
+
+        case '6months':
+          nextPeriodStart = new Date(currentPeriodStart);
+          nextPeriodStart.setMonth(nextPeriodStart.getMonth() + 6);
+          break;
+
+        case 'year':
+          nextPeriodStart = new Date(currentPeriodStart);
+          nextPeriodStart.setFullYear(nextPeriodStart.getFullYear() + 1);
+          break;
+      }
+
+      return nextPeriodStart > today;
+    }
+
+    function formatPeriodRange() {
+      const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+
+      switch(currentView) {
+        case 'week':
+          // Format: "November 3 - 9, 2025" or "October 30 - November 5, 2025"
+          const startMonth = months[currentPeriodStart.getMonth()];
+          const endMonth = months[currentPeriodEnd.getMonth()];
+          const startDay = currentPeriodStart.getDate();
+          const endDay = currentPeriodEnd.getDate();
+          const year = currentPeriodEnd.getFullYear();
+
+          if (startMonth === endMonth) {
+            return `${startMonth} ${startDay} - ${endDay}, ${year}`;
+          } else {
+            return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
+          }
+
+        case 'month':
+          // Format: "November 2025"
+          return `${months[currentPeriodStart.getMonth()]} ${currentPeriodStart.getFullYear()}`;
+
+        case '6months':
+          // Format: "June - November 2025" or "October 2024 - March 2025"
+          const start6Month = months[currentPeriodStart.getMonth()];
+          const end6Month = months[currentPeriodEnd.getMonth()];
+          const startYear = currentPeriodStart.getFullYear();
+          const endYear = currentPeriodEnd.getFullYear();
+
+          if (startYear === endYear) {
+            return `${start6Month} - ${end6Month} ${endYear}`;
+          } else {
+            return `${start6Month} ${startYear} - ${end6Month} ${endYear}`;
+          }
+
+        case 'year':
+          return currentPeriodStart.getFullYear().toString();
+      }
+    }
+
+    // ==================== Symptom Selection ====================
+
+    function toggleSymptom(symptomId) {
+      if (selectedSymptoms.has(symptomId)) {
+        selectedSymptoms.delete(symptomId);
+      } else {
+        selectedSymptoms.add(symptomId);
+      }
+
+      updateSymptomPillsUI();
+      updateChart();
+    }
+
+    function highlightSymptom(symptomId) {
+      const pill = document.querySelector(`[data-symptom-id="${symptomId}"]`);
+      pill.classList.add('highlighted');
+    }
+
+    function unhighlightSymptom(symptomId) {
+      const pill = document.querySelector(`[data-symptom-id="${symptomId}"]`);
+      pill.classList.remove('highlighted');
+    }
+
+    function updateSymptomPillsUI() {
+      ALL_SYMPTOMS.forEach(symptom => {
+        const pill = document.querySelector(`[data-symptom-id="${symptom.id}"]`);
+        pill.classList.toggle('selected', selectedSymptoms.has(symptom.id));
+      });
+    }
+
+    function selectAllSymptoms() {
+      selectedSymptoms = new Set(ALL_SYMPTOMS.map(s => s.id));
+      updateSymptomPillsUI();
+      updateChart();
+    }
+
+    function clearAllSymptoms() {
+      selectedSymptoms.clear();
+      updateSymptomPillsUI();
+      updateChart();
+    }
+
+    // ==================== Data Loading ====================
+
+    function loadData() {
+      // Check data version and clear if outdated
+      const savedVersion = localStorage.getItem('dataVersion');
+      const savedData = localStorage.getItem('dailyLogs');
+
+      if (savedVersion !== DATA_VERSION) {
+        console.log('Data version mismatch. Regenerating data...');
+        dailyLogs = generateMockData();
+        localStorage.setItem('dailyLogs', JSON.stringify(dailyLogs));
+        localStorage.setItem('dataVersion', DATA_VERSION);
+        console.log('Generated new mock data with version', DATA_VERSION);
+      } else if (savedData) {
+        try {
+          dailyLogs = JSON.parse(savedData);
+          console.log('Loaded existing data from localStorage (version', DATA_VERSION, ')');
+        } catch (e) {
+          console.error('Error parsing saved data, generating new data', e);
+          dailyLogs = generateMockData();
+          localStorage.setItem('dailyLogs', JSON.stringify(dailyLogs));
+          localStorage.setItem('dataVersion', DATA_VERSION);
+        }
+      } else {
+        // Generate new mock data if none exists
+        dailyLogs = generateMockData();
+        localStorage.setItem('dailyLogs', JSON.stringify(dailyLogs));
+        localStorage.setItem('dataVersion', DATA_VERSION);
+        console.log('Generated new mock data and saved to localStorage');
+      }
+
+      // Select top 3 by burden as default
+      const top3 = getTop3Symptoms(dailyLogs);
+      selectedSymptoms = new Set(top3);
+
+      updateSymptomPillsUI();
+      updateChart();
+    }
+
+    // Helper function to clear saved data (can be called from browser console)
+    window.clearMockData = function() {
+      localStorage.removeItem('dailyLogs');
+      console.log('Mock data cleared. Refresh the page to generate new data.');
+    };
+
+    // Helper function to clear all saved data including view preferences
+    window.clearAllData = function() {
+      localStorage.clear();
+      console.log('All data cleared. Refresh the page to start fresh.');
+      location.reload();
+    };
+
+    // ==================== Chart Rendering ====================
+
+    function updateChart() {
+      if (selectedSymptoms.size === 0) {
+        showEmptyChart();
+        return;
+      }
+
+      const chartData = prepareChartData();
+      renderChart(chartData);
+    }
+
+    function prepareChartData() {
+      const filteredLogs = dailyLogs.filter(log => {
+        const logDate = new Date(log.date);
+        return logDate >= currentPeriodStart && logDate <= currentPeriodEnd;
+      });
+
+      switch(currentView) {
+        case 'week':
+          return prepareWeekViewData(filteredLogs);
+        case 'month':
+          return prepareMonthViewData(filteredLogs);
+        case '6months':
+          return prepare6MonthsViewData(filteredLogs);
+        case 'year':
+          return prepareYearViewData(filteredLogs);
+        default:
+          return { labels: [], datasets: [] };
+      }
+    }
+
+    // ==================== Week View ====================
+
+    function prepareWeekViewData(logs) {
+      const labels = [];
+      const datasets = [];
+      const tooltipDates = []; // Store full date info for tooltips
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Prepare datasets for each selected symptom
+      const selectedSymptomsData = ALL_SYMPTOMS.filter(s => selectedSymptoms.has(s.id));
+
+      selectedSymptomsData.forEach(symptom => {
+        const isEvent = symptom.type === 'event';
+
+        if (isEvent) {
+          // Bar dataset for count
+          datasets.push({
+            label: `${symptom.name} (Count)`,
+            type: 'bar',
+            data: [],
+            backgroundColor: getColor(symptom.id, 0.6),
+            borderColor: getColor(symptom.id),
+            borderWidth: 0,
+            yAxisID: 'yCount',
+            symptomId: symptom.id,
+            dataType: 'count'
+          });
+
+          // Line dataset for severity
+          datasets.push({
+            label: `${symptom.name} (Severity)`,
+            type: 'line',
+            data: [],
+            borderColor: getColor(symptom.id),
+            backgroundColor: 'transparent',
+            borderWidth: 3,
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'ySev',
+            symptomId: symptom.id,
+            dataType: 'severity'
+          });
+        } else if (symptom.type === 'daily') {
+          // Line dataset for daily severity
+          datasets.push({
+            label: symptom.name,
+            type: 'line',
+            data: [],
+            borderColor: getColor(symptom.id),
+            backgroundColor: 'transparent',
+            borderWidth: 3,
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'ySev',
+            symptomId: symptom.id,
+            dataType: 'severity'
+          });
+        } else if (symptom.type === 'weekly') {
+          // Line dataset for weekly severity (horizontal line)
+          datasets.push({
+            label: symptom.name,
+            type: 'line',
+            data: [],
+            borderColor: getColor(symptom.id),
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            fill: false,
+            tension: 0, // Straight line
+            pointRadius: [4, 0, 0, 0, 0, 0, 0], // Only show point on Sunday
+            pointHoverRadius: [6, 0, 0, 0, 0, 0, 0],
+            yAxisID: 'ySev',
+            symptomId: symptom.id,
+            dataType: 'severity',
+            borderDash: [], // Solid line
+            spanGaps: false
+          });
+        }
+      });
+
+      // Generate data for each day of the week
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(currentPeriodStart);
+        d.setDate(d.getDate() + i);
+        const dateStr = d.toISOString().split('T')[0];
+
+        labels.push(dayNames[i]);
+
+        // Store tooltip date: "Nov 5, 2025"
+        const month = monthNamesShort[d.getMonth()];
+        const day = d.getDate();
+        const year = d.getFullYear();
+        tooltipDates.push(`${month} ${day}, ${year}`);
+
+        // Check if this day is in the future
+        const isFuture = d > today;
+
+        selectedSymptomsData.forEach(symptom => {
+          const dayLogs = logs.filter(l => l.date === dateStr && l.symptom_id === symptom.id);
+
+          if (symptom.type === 'event') {
+            const countDataset = datasets.find(d => d.symptomId === symptom.id && d.dataType === 'count');
+            const sevDataset = datasets.find(d => d.symptomId === symptom.id && d.dataType === 'severity');
+
+            if (isFuture || dayLogs.length === 0) {
+              countDataset.data.push(null);
+              sevDataset.data.push(null);
+            } else {
+              const log = dayLogs[0];
+              countDataset.data.push(log.d_evt_count || 0);
+              sevDataset.data.push(log.d_evt_sev_max || 0);
+            }
+          } else if (symptom.type === 'daily') {
+            const dataset = datasets.find(d => d.symptomId === symptom.id);
+
+            if (isFuture || dayLogs.length === 0) {
+              dataset.data.push(null);
+            } else {
+              const log = dayLogs[0];
+              dataset.data.push(log.d_sev || 0);
+            }
+          } else if (symptom.type === 'weekly') {
+            const dataset = datasets.find(d => d.symptomId === symptom.id);
+
+            // For weekly symptoms, find the Sunday of this week
+            // Use UTC date to avoid timezone issues
+            const year = d.getFullYear();
+            const month = d.getMonth();
+            const day = d.getDate();
+            const localDate = new Date(year, month, day); // Create date in local time
+
+            const dayOfWeek = localDate.getDay();
+            const sunday = new Date(year, month, day - dayOfWeek);
+
+            const sundayYear = sunday.getFullYear();
+            const sundayMonth = String(sunday.getMonth() + 1).padStart(2, '0');
+            const sundayDay = String(sunday.getDate()).padStart(2, '0');
+            const sundayStr = `${sundayYear}-${sundayMonth}-${sundayDay}`;
+
+            // Search in dailyLogs instead of filtered logs
+            const weekLog = dailyLogs.find(l => l.date === sundayStr && l.symptom_id === symptom.id);
+
+            if (isFuture || !weekLog) {
+              dataset.data.push(null);
+            } else {
+              dataset.data.push(weekLog.w_anchor_sev || 0);
+            }
+          }
+        });
+      }
+
+      return { labels, datasets, tooltipDates };
+    }
+
+    // ==================== Month View ====================
+
+    function prepareMonthViewData(logs) {
+      const labels = [];
+      const datasets = [];
+      const tooltipDates = []; // Store full date info for tooltips
+      const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const selectedSymptomsData = ALL_SYMPTOMS.filter(s => selectedSymptoms.has(s.id));
+
+      selectedSymptomsData.forEach(symptom => {
+        const isEvent = symptom.type === 'event';
+
+        if (isEvent) {
+          datasets.push({
+            label: `${symptom.name} (Count)`,
+            type: 'bar',
+            data: [],
+            backgroundColor: getColor(symptom.id, 0.6),
+            borderColor: getColor(symptom.id),
+            borderWidth: 0,
+            yAxisID: 'yCount',
+            symptomId: symptom.id,
+            dataType: 'count'
+          });
+
+          datasets.push({
+            label: `${symptom.name} (Severity)`,
+            type: 'line',
+            data: [],
+            borderColor: getColor(symptom.id),
+            backgroundColor: 'transparent',
+            borderWidth: 3,
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'ySev',
+            symptomId: symptom.id,
+            dataType: 'severity'
+          });
+        } else {
+          datasets.push({
+            label: symptom.name,
+            type: 'line',
+            data: [],
+            borderColor: getColor(symptom.id),
+            backgroundColor: 'transparent',
+            borderWidth: 3,
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'ySev',
+            symptomId: symptom.id,
+            dataType: 'severity'
+          });
+        }
+      });
+
+      // Get days in month
+      const daysInMonth = new Date(currentPeriodStart.getFullYear(), currentPeriodStart.getMonth() + 1, 0).getDate();
+
+      // Generate data for each day of the month
+      for (let day = 1; day <= daysInMonth; day++) {
+        const d = new Date(currentPeriodStart.getFullYear(), currentPeriodStart.getMonth(), day);
+        const dateStr = d.toISOString().split('T')[0];
+
+        // Show all days with format "Nov 1", "Nov 2", etc.
+        const month = monthNamesShort[d.getMonth()];
+        labels.push(`${month} ${day}`);
+
+        // Store tooltip date: "Nov 15, 2025"
+        const year = d.getFullYear();
+        tooltipDates.push(`${month} ${day}, ${year}`);
+
+        const isFuture = d > today;
+
+        selectedSymptomsData.forEach(symptom => {
+          const dayLogs = logs.filter(l => l.date === dateStr && l.symptom_id === symptom.id);
+
+          if (symptom.type === 'event') {
+            const countDataset = datasets.find(d => d.symptomId === symptom.id && d.dataType === 'count');
+            const sevDataset = datasets.find(d => d.symptomId === symptom.id && d.dataType === 'severity');
+
+            if (isFuture || dayLogs.length === 0) {
+              countDataset.data.push(null);
+              sevDataset.data.push(null);
+            } else {
+              const log = dayLogs[0];
+              countDataset.data.push(log.d_evt_count || 0);
+              sevDataset.data.push(log.d_evt_sev_max || 0);
+            }
+          } else if (symptom.type === 'daily') {
+            const dataset = datasets.find(d => d.symptomId === symptom.id);
+
+            if (isFuture || dayLogs.length === 0) {
+              dataset.data.push(null);
+            } else {
+              const log = dayLogs[0];
+              dataset.data.push(log.d_sev || 0);
+            }
+          } else if (symptom.type === 'weekly') {
+            const dataset = datasets.find(d => d.symptomId === symptom.id);
+
+            // For weekly symptoms, find the Sunday of this week
+            const sunday = new Date(d);
+            sunday.setDate(sunday.getDate() - sunday.getDay());
+            const sundayStr = sunday.toISOString().split('T')[0];
+
+            const weekLog = logs.find(l => l.date === sundayStr && l.symptom_id === symptom.id);
+
+            if (isFuture || !weekLog) {
+              dataset.data.push(null);
+            } else {
+              dataset.data.push(weekLog.w_anchor_sev || 0);
+            }
+          }
+        });
+      }
+
+      return { labels, datasets, tooltipDates };
+    }
+
+    // ==================== 6 Months View ====================
+
+    function prepare6MonthsViewData(logs) {
+      const labels = [];
+      const datasets = [];
+      const dateRanges = []; // Store date ranges for tooltip
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const selectedSymptomsData = ALL_SYMPTOMS.filter(s => selectedSymptoms.has(s.id));
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+      selectedSymptomsData.forEach(symptom => {
+        const isEvent = symptom.type === 'event';
+
+        if (isEvent) {
+          datasets.push({
+            label: `${symptom.name} (Avg Count/Day)`,
+            type: 'bar',
+            data: [],
+            backgroundColor: getColor(symptom.id, 0.6),
+            borderColor: getColor(symptom.id),
+            borderWidth: 0,
+            yAxisID: 'yCount',
+            symptomId: symptom.id,
+            dataType: 'count'
+          });
+
+          datasets.push({
+            label: `${symptom.name} (Avg Severity)`,
+            type: 'line',
+            data: [],
+            borderColor: getColor(symptom.id),
+            backgroundColor: 'transparent',
+            borderWidth: 3,
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'ySev',
+            symptomId: symptom.id,
+            dataType: 'severity'
+          });
+        } else {
+          datasets.push({
+            label: `${symptom.name} (Avg Severity)`,
+            type: 'line',
+            data: [],
+            borderColor: getColor(symptom.id),
+            backgroundColor: 'transparent',
+            borderWidth: 3,
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'ySev',
+            symptomId: symptom.id,
+            dataType: 'severity'
+          });
+        }
+      });
+
+      // Generate data for every 5 days across the 6-month period
+      for (let windowStart = new Date(currentPeriodStart); windowStart <= currentPeriodEnd; ) {
+        const windowEnd = new Date(windowStart);
+        windowEnd.setDate(windowEnd.getDate() + 4); // 5-day window (day 1-5)
+
+        // Clamp to period end
+        if (windowEnd > currentPeriodEnd) {
+          windowEnd.setTime(currentPeriodEnd.getTime());
+        }
+
+        // Create label: "Jun 1", "Jun 6", etc. with abbreviated month names
+        const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const labelDate = new Date(windowStart);
+        labels.push(`${monthNamesShort[labelDate.getMonth()]} ${labelDate.getDate()}`);
+
+        // Store date range for tooltip with abbreviated month names
+        const startMonth = monthNamesShort[windowStart.getMonth()];
+        const endMonth = monthNamesShort[windowEnd.getMonth()];
+        const startDay = windowStart.getDate();
+        const endDay = windowEnd.getDate();
+        const year = windowEnd.getFullYear();
+
+        let dateRangeStr;
+        if (startMonth === endMonth) {
+          // Same month: "Nov 1-5, 2025" (no space between day numbers)
+          dateRangeStr = `${startMonth} ${startDay}-${endDay}, ${year}`;
+        } else {
+          // Different months: "Oct 30 - Nov 3, 2025" (with spaces)
+          dateRangeStr = `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
+        }
+        dateRanges.push(dateRangeStr);
+
+        // Check if window contains future dates
+        const windowInFuture = windowStart > today;
+
+        selectedSymptomsData.forEach(symptom => {
+          const windowStartStr = windowStart.toISOString().split('T')[0];
+          const windowEndStr = windowEnd.toISOString().split('T')[0];
+
+          const windowLogs = logs.filter(l => {
+            return l.date >= windowStartStr && l.date <= windowEndStr && l.symptom_id === symptom.id;
+          });
+
+          if (symptom.type === 'event') {
+            const countDataset = datasets.find(d => d.symptomId === symptom.id && d.dataType === 'count');
+            const sevDataset = datasets.find(d => d.symptomId === symptom.id && d.dataType === 'severity');
+
+            if (windowInFuture || windowLogs.length === 0) {
+              countDataset.data.push(null);
+              sevDataset.data.push(null);
+            } else {
+              // Average daily count across the window
+              const totalCount = windowLogs.reduce((sum, l) => sum + (l.d_evt_count || 0), 0);
+              countDataset.data.push(totalCount / windowLogs.length);
+
+              // Average severity across the window
+              const totalSev = windowLogs.reduce((sum, l) => sum + (l.d_evt_sev_max || 0), 0);
+              sevDataset.data.push(totalSev / windowLogs.length);
+            }
+          } else if (symptom.type === 'daily') {
+            const dataset = datasets.find(d => d.symptomId === symptom.id);
+
+            if (windowInFuture || windowLogs.length === 0) {
+              dataset.data.push(null);
+            } else {
+              // Average severity across the window
+              const totalSev = windowLogs.reduce((sum, l) => sum + (l.d_sev || 0), 0);
+              dataset.data.push(totalSev / windowLogs.length);
+            }
+          } else if (symptom.type === 'weekly') {
+            const dataset = datasets.find(d => d.symptomId === symptom.id);
+
+            // windowLogs already contains weekly logs (which are always on Sundays)
+            if (windowInFuture || windowLogs.length === 0) {
+              dataset.data.push(null);
+            } else {
+              // Average of all w_anchor_sev in the window
+              const totalSev = windowLogs.reduce((sum, l) => sum + (l.w_anchor_sev || 0), 0);
+              dataset.data.push(totalSev / windowLogs.length);
+            }
+          }
+        });
+
+        // Move window forward by 5 days
+        windowStart.setDate(windowStart.getDate() + 5);
+      }
+
+      return { labels, datasets, dateRanges };
+    }
+
+    // ==================== Year View ====================
+
+    function prepareYearViewData(logs) {
+      const labels = [];
+      const datasets = [];
+      const tooltipDates = []; // Store full date info for tooltips
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const selectedSymptomsData = ALL_SYMPTOMS.filter(s => selectedSymptoms.has(s.id));
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      selectedSymptomsData.forEach(symptom => {
+        const isEvent = symptom.type === 'event';
+
+        if (isEvent) {
+          datasets.push({
+            label: `${symptom.name} (Avg Count/Day)`,
+            type: 'bar',
+            data: [],
+            backgroundColor: getColor(symptom.id, 0.6),
+            borderColor: getColor(symptom.id),
+            borderWidth: 0,
+            yAxisID: 'yCount',
+            symptomId: symptom.id,
+            dataType: 'count'
+          });
+
+          datasets.push({
+            label: `${symptom.name} (Avg Severity)`,
+            type: 'line',
+            data: [],
+            borderColor: getColor(symptom.id),
+            backgroundColor: 'transparent',
+            borderWidth: 3,
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'ySev',
+            symptomId: symptom.id,
+            dataType: 'severity'
+          });
+        } else {
+          datasets.push({
+            label: `${symptom.name} (Avg Severity)`,
+            type: 'line',
+            data: [],
+            borderColor: getColor(symptom.id),
+            backgroundColor: 'transparent',
+            borderWidth: 3,
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'ySev',
+            symptomId: symptom.id,
+            dataType: 'severity'
+          });
+        }
+      });
+
+      // Generate data for each month of the year
+      const year = currentPeriodStart.getFullYear();
+
+      for (let month = 0; month < 12; month++) {
+        // Use abbreviated month names for labels: "Jan", "Feb", etc.
+        labels.push(monthNamesShort[month]);
+
+        // Store tooltip date: "Nov 2025"
+        tooltipDates.push(`${monthNamesShort[month]} ${year}`);
+
+        const monthStart = new Date(year, month, 1);
+        const monthEnd = new Date(year, month + 1, 0);
+
+        // Check if entire month is in the future
+        const monthInFuture = monthStart > today;
+
+        selectedSymptomsData.forEach(symptom => {
+          const monthLogs = logs.filter(l => {
+            const logDate = new Date(l.date);
+            return logDate >= monthStart && logDate <= monthEnd && l.symptom_id === symptom.id;
+          });
+
+          if (symptom.type === 'event') {
+            const countDataset = datasets.find(d => d.symptomId === symptom.id && d.dataType === 'count');
+            const sevDataset = datasets.find(d => d.symptomId === symptom.id && d.dataType === 'severity');
+
+            if (monthInFuture || monthLogs.length === 0) {
+              countDataset.data.push(null);
+              sevDataset.data.push(null);
+            } else {
+              const totalCount = monthLogs.reduce((sum, l) => sum + (l.d_evt_count || 0), 0);
+              countDataset.data.push(totalCount / monthLogs.length);
+
+              const totalSev = monthLogs.reduce((sum, l) => sum + (l.d_evt_sev_max || 0), 0);
+              sevDataset.data.push(totalSev / monthLogs.length);
+            }
+          } else if (symptom.type === 'daily') {
+            const dataset = datasets.find(d => d.symptomId === symptom.id);
+
+            if (monthInFuture || monthLogs.length === 0) {
+              dataset.data.push(null);
+            } else {
+              const totalSev = monthLogs.reduce((sum, l) => sum + (l.d_sev || 0), 0);
+              dataset.data.push(totalSev / monthLogs.length);
+            }
+          } else if (symptom.type === 'weekly') {
+            const dataset = datasets.find(d => d.symptomId === symptom.id);
+
+            // monthLogs already filtered by symptom_id, so these are all weekly logs (on Sundays)
+            if (monthInFuture || monthLogs.length === 0) {
+              dataset.data.push(null);
+            } else {
+              const totalSev = monthLogs.reduce((sum, l) => sum + (l.w_anchor_sev || 0), 0);
+              dataset.data.push(totalSev / monthLogs.length);
+            }
+          }
+        });
+      }
+
+      return { labels, datasets, tooltipDates };
+    }
+
+
+    // ==================== Chart Rendering ====================
+
+    function renderChart(chartData) {
+      const ctx = document.getElementById('trendChart').getContext('2d');
+
+      if (trendChart) {
+        trendChart.destroy();
+      }
+
+      trendChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                padding: 15,
+                usePointStyle: true,
+                font: {
+                  size: 12,
+                  weight: '600'
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                title: function(context) {
+                  const index = context[0].dataIndex;
+
+                  // Use custom date formats based on view
+                  if (currentView === '6months' && chartData.dateRanges) {
+                    return chartData.dateRanges[index] || context[0].label;
+                  } else if (chartData.tooltipDates) {
+                    return chartData.tooltipDates[index] || context[0].label;
+                  }
+
+                  return context[0].label;
+                },
+                label: function(context) {
+                  const value = Math.abs(context.parsed.y);
+                  const isCount = context.dataset.yAxisID === 'yCount';
+                  if (isCount) {
+                    return `${context.dataset.label}: ${value.toFixed(2)} times/day`;
+                  } else {
+                    return `${context.dataset.label}: ${value.toFixed(2)}/4`;
+                  }
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                maxRotation: 45,
+                minRotation: 45
+              }
+            },
+            yCount: {
+              type: 'linear',
+              position: 'left',
+              min: 0,
+              title: {
+                display: true,
+                text: 'Event Count (times/day)',
+                font: {
+                  size: 13,
+                  weight: '600'
+                }
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              }
+            },
+            ySev: {
+              type: 'linear',
+              position: 'right',
+              min: 0,
+              max: 4,
+              reverse: false,
+              title: {
+                display: true,
+                text: 'Severity Score (0-4)',
+                font: {
+                  size: 13,
+                  weight: '600'
+                }
+              },
+              grid: {
+                drawOnChartArea: false
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function showEmptyChart() {
+      const container = document.querySelector('.chart-container');
+      if (trendChart) trendChart.destroy();
+
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📊</div>
+          <div class="empty-text">Select symptoms to view trends</div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        container.innerHTML = '<canvas id="trendChart"></canvas>';
+      }, 100);
+    }
+
+    // ==================== Color Palette ====================
+    
+    function getColor(symptomId, alpha = 1) {
+      const colors = {
+        // Event type (red tones)
+        'hot_flashes': `rgba(255, 99, 132, ${alpha})`,
+        'heart_discomfort': `rgba(255, 159, 64, ${alpha})`,
+        'bladder_problems': `rgba(255, 206, 86, ${alpha})`,
+        
+        // Daily diary (blue tones)
+        'sleep_problems': `rgba(54, 162, 235, ${alpha})`,
+        'joint_pain': `rgba(75, 192, 192, ${alpha})`,
+        'depressive_mood': `rgba(153, 102, 255, ${alpha})`,
+        'irritability': `rgba(201, 203, 207, ${alpha})`,
+        'anxiety': `rgba(100, 149, 237, ${alpha})`,
+        'exhaustion': `rgba(135, 206, 250, ${alpha})`,
+        
+        // Weekly diary (purple tones)
+        'sexual_problems': `rgba(186, 85, 211, ${alpha})`,
+        'vaginal_dryness': `rgba(221, 160, 221, ${alpha})`
+      };
+      
+      return colors[symptomId] || `rgba(128, 128, 128, ${alpha})`;
+    }
+
+    // ==================== Initialize ====================
+    
+    window.addEventListener('DOMContentLoaded', initializeUI);
+  </script>
+</body>
+</html>

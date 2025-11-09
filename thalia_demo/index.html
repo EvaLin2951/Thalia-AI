@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thalia - 您的更年期健康助手</title>
+  <style>
+    :root {
+      --purple: #6a1b9a;
+      --purple-light: #a65cc3;
+      --purple-bg: #f5f0f8;
+      --blue-accent: #2ba4e0;
+      --ink: #2f2a3a;
+      --ink-muted: #5e566b;
+      --surface: #ffffff;
+      --border: #e8e4ee;
+      --shadow: rgba(106, 27, 154, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #fef5fb 0%, #f0f8fc 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: var(--ink);
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--surface);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 90vh;
+      max-height: 700px;
+    }
+
+    /* Header */
+    .app-header {
+      background: linear-gradient(135deg, #f5d8f0, #d0e8f8);
+      padding: 24px 32px;
+      color: var(--purple);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .app-title {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      color: var(--purple);
+    }
+
+    .app-subtitle {
+      font-size: 13px;
+      color: var(--purple);
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+
+    /* Chat Area */
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 32px;
+      background: #fdfafd;
+    }
+
+    .message {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.bot {
+      justify-content: flex-start;
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d946bf, #2ba4e0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .message-content {
+      max-width: 70%;
+      background: var(--surface);
+      padding: 16px 20px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      line-height: 1.6;
+    }
+
+    .message.user .message-content {
+      background: var(--purple);
+      color: white;
+    }
+
+    .message.bot .message-content {
+      border-top-left-radius: 4px;
+    }
+
+    .message.user .message-content {
+      border-top-right-radius: 4px;
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 24px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #d946bf, #2ba4e0);
+      color: white;
+      box-shadow: 0 3px 10px rgba(217,70,191,.18);
+      animation: breathe 2.5s ease-in-out infinite;
+    }
+
+    .btn-primary:hover {
+      animation: none;
+      transform: scale(1.02);
+      box-shadow: 0 5px 15px rgba(217,70,191,.28);
+      filter: saturate(1.05);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #d946bf;
+      border: 2px solid #f5d8f0;
+      box-shadow: 0 3px 10px rgba(217,70,191,.18);
+    }
+
+    .btn-secondary:hover {
+      transform: scale(1.02);
+      box-shadow: 0 5px 15px rgba(217,70,191,.28);
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, #d946bf, #2ba4e0);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(217,70,191,.25);
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(217,70,191,.35);
+      filter: saturate(1.05);
+    }
+
+    /* Loading Animation */
+    .loading {
+      display: flex;
+      gap: 6px;
+      padding: 8px 0;
+    }
+
+    .loading span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #d946bf;
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+
+    .loading span:nth-child(1) { animation-delay: -0.32s; }
+    .loading span:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); box-shadow: 0 3px 10px rgba(217,70,191,.18); }
+      50% { transform: scale(1.02); box-shadow: 0 5px 15px rgba(217,70,191,.28); }
+    }
+
+    /* Modal for Questionnaire */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 1100px;
+      height: 95vh;
+      max-height: 900px;
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+    }
+
+    .modal-content iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Results Display */
+    .result-card {
+      background: linear-gradient(135deg, #fff9fc, #f8fbff);
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    /* New score cards */
+    .score-card-large {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin: 16px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .score-card-large.severity-none { background: #e8f5e9; border: 2px solid #4caf50; }
+    .score-card-large.severity-mild { background: #fff9c4; border: 2px solid #ffc107; }
+    .score-card-large.severity-moderate { background: #ffe0b2; border: 2px solid #ff9800; }
+    .score-card-large.severity-severe { background: #ffcdd2; border: 2px solid #f44336; }
+
+    .score-label {
+      font-size: 14px;
+      color: var(--ink-muted);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .score-value {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .score-severity {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 8px;
+      text-transform: capitalize;
+    }
+
+    .score-cards-row {
+      display: flex;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .score-card-small {
+      flex: 1;
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .score-card-small.severity-none { background: #e8f5e9; }
+    .score-card-small.severity-mild { background: #fff9c4; }
+    .score-card-small.severity-moderate { background: #ffe0b2; }
+    .score-card-small.severity-severe { background: #ffcdd2; }
+
+    .score-card-icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .score-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .score-card-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .score-card-max {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--ink-subtle);
+    }
+
+    .score-card-severity-small {
+      font-size: 12px;
+      font-weight: 500;
+      margin-top: 4px;
+      color: var(--ink-muted);
+    }
+
+    .recommendation-box {
+      background: #f8f9ff;
+      border-left: 4px solid var(--blue-accent);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+
+    /* Severity Scale Bar */
+    .severity-scale-container {
+      margin: 20px 0;
+      padding: 0 10px;
+    }
+
+    /* Segmented severity bar */
+    .severity-segments {
+      display: flex;
+      height: 40px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 16px 0 12px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    .severity-segment {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-right: 2px solid white;
+      position: relative;
+      transition: all 0.3s ease;
+      opacity: 0.4;
+    }
+    
+    .severity-segment.active {
+      opacity: 1;
+    }
+
+    .severity-segment:last-child {
+      border-right: none;
+    }
+
+    .severity-segment.minimal {
+      flex: 9;
+      background: linear-gradient(135deg, #7c9cec, #8da8ee);
+    }
+
+    .severity-segment.mild {
+      flex: 9;
+      background: linear-gradient(135deg, #a78bfa, #b89dfc);
+    }
+
+    .severity-segment.moderate {
+      flex: 16;
+      background: linear-gradient(135deg, #d946bf, #dd5cc7);
+    }
+
+    .severity-segment.severe {
+      flex: 66;
+      background: linear-gradient(135deg, #e879b9, #f099cc);
+    }
+
+    .segment-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      margin-bottom: 2px;
+    }
+
+    .segment-range {
+      font-size: 10px;
+      color: rgba(255,255,255,0.9);
+      font-weight: 500;
+    }
+
+    .severity-segment.minimal.active {
+      color: #7c9cec;
+    }
+
+    .severity-segment.mild.active {
+      color: #a78bfa;
+    }
+
+    .severity-segment.moderate.active {
+      color: #d946bf;
+    }
+
+    .severity-segment.severe.active {
+      color: #e879b9;
+    }
+
+    .current-score-indicator {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .current-score-indicator .arrow {
+      font-size: 16px;
+      color: var(--purple);
+    }
+
+
+    /* Simplified result layout */
+    .result-header {
+      text-align: center;
+      margin: 20px 0 16px 0;
+    }
+
+    .result-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .result-explanation {
+      font-size: 15px;
+      color: var(--ink-muted);
+      line-height: 1.6;
+      margin: 20px 10px 16px 10px;
+      text-align: center;
+    }
+
+    /* Simplified score cards */
+    .score-card-simple {
+      flex: 1;
+      background: white;
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      border: 2px solid transparent;
+    }
+
+    .score-card-simple.severity-none { border-color: #7c9cec; background: #eef3ff; }
+    .score-card-simple.severity-mild { border-color: #a78bfa; background: #f5f0ff; }
+    .score-card-simple.severity-moderate { border-color: #d946bf; background: #fef0f9; }
+    .score-card-simple.severity-severe { border-color: #e879b9; background: #fff5fb; }
+
+    .card-icon {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .card-info {
+      font-size: 13px;
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    .card-domain {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .card-details {
+      font-size: 13px;
+      color: var(--ink-muted);
+    }
+
+    .card-severity-inline {
+      font-weight: 500;
+    }
+
+    .card-score {
+      font-weight: 500;
+    }
+
+    /* Scientific note */
+    .scientific-note {
+      font-size: 13px;
+      color: var(--ink-subtle);
+      line-height: 1.7;
+      margin: 20px 10px 16px 10px;
+      text-align: center;
+    }
+
+    .scientific-note a {
+      color: var(--purple);
+      font-weight: 500;
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(106, 27, 154, 0.35);
+    }
+
+    .scientific-note a:hover {
+      text-decoration: underline;
+    }
+
+    /* CTA section */
+    .cta-text {
+      font-size: 14px;
+      color: var(--ink-muted);
+      text-align: center;
+      margin: 16px 10px 12px 10px;
+      line-height: 1.5;
+    }
+
+    .simple-recommendation {
+      background: linear-gradient(135deg, #fdf5fb, #f0f8fc);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--ink);
+      border-left: 4px solid #d946bf;
+    }
+
+    /* New result layout styles */
+    .score-main-card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      margin: 20px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .score-main-card.severity-none { background: #e8f5e9; }
+    .score-main-card.severity-mild { background: #fff9c4; }
+    .score-main-card.severity-moderate { background: #ffe0b2; }
+    .score-main-card.severity-severe { background: #ffcdd2; }
+
+    .score-main-number {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .score-main-card.severity-none .score-main-number { color: #2e7d32; }
+    .score-main-card.severity-mild .score-main-number { color: #f57f17; }
+    .score-main-card.severity-moderate .score-main-number { color: #e65100; }
+    .score-main-card.severity-severe .score-main-number { color: #c62828; }
+
+    .score-main-label {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .score-main-card.severity-none .score-main-label { color: #2e7d32; }
+    .score-main-card.severity-mild .score-main-label { color: #f57f17; }
+    .score-main-card.severity-moderate .score-main-label { color: #e65100; }
+    .score-main-card.severity-severe .score-main-label { color: #c62828; }
+
+    .score-categories {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .score-category-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .score-category-card.severity-none { background: #e8f5e9; }
+    .score-category-card.severity-mild { background: #fff9c4; }
+    .score-category-card.severity-moderate { background: #ffe0b2; }
+    .score-category-card.severity-severe { background: #ffcdd2; }
+
+    .category-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
+
+    .category-score {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .score-category-card.severity-none .category-score { color: #2e7d32; }
+    .score-category-card.severity-mild .category-score { color: #f57f17; }
+    .score-category-card.severity-moderate .category-score { color: #e65100; }
+    .score-category-card.severity-severe .category-score { color: #c62828; }
+
+    .category-severity {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .score-category-card.severity-none .category-severity { color: #2e7d32; }
+    .score-category-card.severity-mild .category-severity { color: #f57f17; }
+    .score-category-card.severity-moderate .category-severity { color: #e65100; }
+    .score-category-card.severity-severe .category-severity { color: #c62828; }
+
+    .category-max {
+      font-size: 11px;
+      color: rgba(0,0,0,0.4);
+    }
+
+    .recommendation-text {
+      background: #f8f9ff;
+      border-left: 4px solid var(--purple);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 20px 0;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .score-display {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--purple);
+      text-align: center;
+      margin: 12px 0;
+    }
+
+    .severity-tag {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .severity-none { background: #e8f5e9; color: #2e7d32; }
+    .severity-mild { background: #fff9c4; color: #f57f17; }
+    .severity-moderate { background: #ffe0b2; color: #e65100; }
+    .severity-severe { background: #ffcdd2; color: #c62828; }
+
+    .symptom-list {
+      margin-top: 16px;
+    }
+
+    .symptom-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border-left: 4px solid var(--purple);
+    }
+
+    .symptom-number {
+      font-weight: 700;
+      color: var(--purple);
+      font-size: 18px;
+    }
+
+    .symptom-text {
+      flex: 1;
+    }
+
+    .symptom-score {
+      background: var(--purple-bg);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      color: var(--purple);
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .app-container {
+        height: 100vh;
+        max-height: none;
+        border-radius: 0;
+      }
+
+      .message-content {
+        max-width: 85%;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="app-header">
+      <div>
+        <div class="app-title">🌸 Thalia</div>
+        <div class="app-subtitle">Your Menopause Health Companion</div>
+      </div>
+    </div>
+
+    <div class="chat-container" id="chatContainer">
+      <!-- Messages will be added here -->
+    </div>
+  </div>
+
+  <!-- Modal for Questionnaire -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <iframe id="questionnaireFrame" src=""></iframe>
+    </div>
+  </div>
+
+  <script>
+    // State Management
+    let userHasStartedQuestionnaire = false;
+    let questionnaireData = null;
+
+    // DOM Elements
+    const chatContainer = document.getElementById('chatContainer');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const questionnaireFrame = document.getElementById('questionnaireFrame');
+
+    // Add Message Function
+    function addMessage(text, isBot = true, hasButtons = false, buttons = []) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isBot ? 'bot' : 'user'}`;
+
+      const html = `
+        ${isBot ? '<div class="avatar">T</div>' : ''}
+        <div class="message-content">
+          ${text}
+          ${hasButtons ? `
+            <div class="button-group">
+              ${buttons.map(btn => `
+                <button class="btn ${btn.primary ? 'btn-primary' : 'btn-secondary'}" 
+                        onclick="${btn.onclick}">
+                  ${btn.text}
+                </button>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+        ${!isBot ? '<div class="avatar">You</div>' : ''}
+      `;
+
+      messageDiv.innerHTML = html;
+      chatContainer.appendChild(messageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Add Loading Animation
+    function addLoadingMessage() {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message bot';
+      messageDiv.id = 'loadingMessage';
+      messageDiv.innerHTML = `
+        <div class="avatar">T</div>
+        <div class="message-content">
+          <div class="loading">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      `;
+      chatContainer.appendChild(messageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      return messageDiv;
+    }
+
+    function removeLoadingMessage() {
+      const loading = document.getElementById('loadingMessage');
+      if (loading) loading.remove();
+    }
+
+    // Initial Welcome Message
+    function showWelcomeMessage() {
+      setTimeout(() => {
+        addMessage(`Hi there! Welcome to Thalia.<br><br>Before we begin, I'd love to learn a bit about your experience so I can provide guidance that's most helpful to you. Just 11 quick questions (about 2 minutes) covering common symptoms like sleep, mood, and hot flushes.<br><br>Ready when you are 💜`, true, true, [
+          { text: 'Start Now', primary: true, onclick: 'startQuestionnaire()' },
+          { text: 'Maybe Later', primary: false, onclick: 'skipQuestionnaire()' }
+        ]);
+      }, 500);
+    }
+
+    // Start Questionnaire
+    function startQuestionnaire() {
+      addMessage("Okay, I'm ready to begin the assessment", false);
+      
+      setTimeout(() => {
+        addMessage(`Excellent! Please answer each question based on how you've actually been feeling over the past week. When you're done, click Submit and I'll provide you with a detailed analysis. ✨`);
+        
+        setTimeout(() => {
+          userHasStartedQuestionnaire = true;
+          openQuestionnaireModal();
+        }, 800);
+      }, 500);
+    }
+
+    // Skip Questionnaire
+    function skipQuestionnaire() {
+      addMessage("I'll do it later", false);
+      
+      setTimeout(() => {
+        addMessage(`No problem! You can complete the assessment anytime through the "Health Assessment" in the menu.
+
+However, completing the assessment will help me give you much more accurate recommendations! 😊
+
+Is there anything else I can help you with?`);
+      }, 500);
+    }
+
+    // Open Questionnaire Modal
+    function openQuestionnaireModal() {
+      questionnaireFrame.src = 'mrs_questionnaire.html';
+      modalOverlay.classList.add('active');
+    }
+
+    // Close Questionnaire Modal (中途退出不保存)
+    function closeQuestionnaireModal() {
+      modalOverlay.classList.remove('active');
+      
+      // 延迟清空iframe，避免动画卡顿
+      setTimeout(() => {
+        questionnaireFrame.src = '';
+      }, 300);
+      
+      // 如果用户没有提交就关闭，显示提示
+      if (!questionnaireData) {
+        setTimeout(() => {
+          addMessage(`If you'd like to complete the assessment later, just let me know anytime! 💜`);
+        }, 500);
+      }
+    }
+
+    // Listen to Modal Click (close on outside click)
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        closeQuestionnaireModal();
+      }
+    });
+
+    // Listen to Questionnaire Submission
+    window.addEventListener('message', async (event) => {
+      if (event.data.type === 'MRS_SUBMIT') {
+        questionnaireData = event.data.data;
+        
+        // 关闭模态框并清空iframe
+        modalOverlay.classList.remove('active');
+        setTimeout(() => {
+          questionnaireFrame.src = '';  // 清空iframe，确保下次重新加载
+        }, 300);
+        
+        addMessage('Questionnaire submitted', false);
+        
+        const loading = addLoadingMessage();
+        
+        // Simulate analysis delay
+        setTimeout(async () => {
+          removeLoadingMessage();
+          await displayResults(questionnaireData);
+        }, 2000);
+      }
+    });
+
+    // Calculate Results
+    function calculateResults(data) {
+      const questions = [
+        'Hot flushes, sweating',
+        'Heart discomfort',
+        'Sleep problems',
+        'Depressive mood',
+        'Irritability',
+        'Anxiety',
+        'Physical and mental exhaustion',
+        'Sexual problems',
+        'Bladder problems',
+        'Dryness of vagina',
+        'Joint and muscular discomfort'
+      ];
+
+      let totalScore = 0;
+      let symptoms = [];
+      let maxItemScore = 0;
+
+      for (let i = 1; i <= 11; i++) {
+        const score = data['q' + i] || 0;
+        totalScore += score;
+        maxItemScore = Math.max(maxItemScore, score);
+        
+        if (score > 0) {
+          symptoms.push({
+            number: i,
+            text: questions[i - 1],
+            score: score,
+            label: ['None', 'Mild', 'Moderate', 'Severe', 'Very Severe'][score]
+          });
+        }
+      }
+
+      // Sort by score descending
+      symptoms.sort((a, b) => b.score - a.score);
+
+      // Calculate sub-scores
+      const psychologicalScore = (data.q4 || 0) + (data.q5 || 0) + (data.q6 || 0) + (data.q7 || 0);
+      const somaticScore = (data.q1 || 0) + (data.q2 || 0) + (data.q3 || 0) + (data.q11 || 0);
+      const urogenitalScore = (data.q8 || 0) + (data.q9 || 0) + (data.q10 || 0);
+
+      // Determine total severity based on MRS clinical standards
+      function getTotalSeverity(score) {
+        if (score <= 4) return { label: 'No or little', class: 'severity-none' };
+        if (score <= 8) return { label: 'Mild', class: 'severity-mild' };
+        if (score <= 15) return { label: 'Moderate', class: 'severity-moderate' };
+        return { label: 'Severe', class: 'severity-severe' };
+      }
+
+      // Determine psychological severity (max 16)
+      function getPsychologicalSeverity(score) {
+        if (score <= 1) return { label: 'No or little', class: 'severity-none' };
+        if (score <= 3) return { label: 'Mild', class: 'severity-mild' };
+        if (score <= 6) return { label: 'Moderate', class: 'severity-moderate' };
+        return { label: 'Severe', class: 'severity-severe' };
+      }
+
+      // Determine somatic severity (max 16)
+      function getSomaticSeverity(score) {
+        if (score <= 2) return { label: 'No or little', class: 'severity-none' };
+        if (score <= 4) return { label: 'Mild', class: 'severity-mild' };
+        if (score <= 7) return { label: 'Moderate', class: 'severity-moderate' };
+        return { label: 'Severe', class: 'severity-severe' };
+      }
+
+      // Determine urogenital severity (max 12)
+      function getUrogenitalSeverity(score) {
+        if (score === 0) return { label: 'No or little', class: 'severity-none' };
+        if (score === 1) return { label: 'Mild', class: 'severity-mild' };
+        if (score <= 3) return { label: 'Moderate', class: 'severity-moderate' };
+        return { label: 'Severe', class: 'severity-severe' };
+      }
+
+      const totalSeverity = getTotalSeverity(totalScore);
+      const psychologicalSeverity = getPsychologicalSeverity(psychologicalScore);
+      const somaticSeverity = getSomaticSeverity(somaticScore);
+      const urogenitalSeverity = getUrogenitalSeverity(urogenitalScore);
+
+      return {
+        totalScore,
+        severity: totalSeverity.label,
+        severityClass: totalSeverity.class,
+        psychologicalScore,
+        psychologicalSeverity: psychologicalSeverity.label,
+        psychologicalClass: psychologicalSeverity.class,
+        somaticScore,
+        somaticSeverity: somaticSeverity.label,
+        somaticClass: somaticSeverity.class,
+        urogenitalScore,
+        urogenitalSeverity: urogenitalSeverity.label,
+        urogenitalClass: urogenitalSeverity.class,
+        symptoms,
+        topSymptoms: symptoms.slice(0, 3),
+        maxItemScore,
+        needsTreatment: totalScore >= 14 || maxItemScore >= 4
+      };
+    }
+
+    // Display Results
+    async function displayResults(data) {
+      const results = calculateResults(data);
+      
+      // Get descriptive title based on severity
+      function getSeverityTitle(severity) {
+        const titles = {
+          'No or little': 'Minimal symptoms detected',
+          'Mild': 'Mild symptoms noted',
+          'Moderate': 'Moderate symptoms present',
+          'Severe': 'Significant symptoms identified'
+        };
+        return titles[severity] || titles['Mild'];
+      }
+
+      // Get one-liner explanation based on severity
+      function getOneLiner(severity) {
+        const oneLiners = {
+          'No or little': 'You\'re managing well. Most days feel comfortable, and continuing your current healthy habits will serve you well.',
+          'Mild': 'You\'re noticing some changes, but they\'re manageable so far. Lifestyle tweaks and monitoring can make a difference.',
+          'Moderate': 'Daily routines are getting harder. This level often benefits from professional guidance, so consider reaching out to your provider.',
+          'Severe': 'These symptoms are taking a real toll. Professional support can help you feel better. Scheduling an appointment is a strong next step.'
+        };
+        return oneLiners[severity] || oneLiners['Mild'];
+      }
+
+      // Get active segment class
+      function getActiveSegment(score) {
+        if (score <= 4) return 'minimal';
+        if (score <= 8) return 'mild';
+        if (score <= 15) return 'moderate';
+        return 'severe';
+      }
+
+      const activeSegment = getActiveSegment(results.totalScore);
+      
+      const resultMessage = `
+        <div class="result-header">
+          <div class="result-title">${getSeverityTitle(results.severity)}</div>
+        </div>
+
+        <div class="result-explanation">
+          ${getOneLiner(results.severity)}
+        </div>
+
+        <div class="severity-scale-container">
+          <div class="severity-segments">
+            <div class="severity-segment minimal ${activeSegment === 'minimal' ? 'active' : ''}">
+              <span class="segment-label">Minimal</span>
+              <span class="segment-range">0-4</span>
+            </div>
+            <div class="severity-segment mild ${activeSegment === 'mild' ? 'active' : ''}">
+              <span class="segment-label">Mild</span>
+              <span class="segment-range">5-8</span>
+            </div>
+            <div class="severity-segment moderate ${activeSegment === 'moderate' ? 'active' : ''}">
+              <span class="segment-label">Moderate</span>
+              <span class="segment-range">9-15</span>
+            </div>
+            <div class="severity-segment severe ${activeSegment === 'severe' ? 'active' : ''}">
+              <span class="segment-label">Severe</span>
+              <span class="segment-range">16-44</span>
+            </div>
+          </div>
+          <div class="current-score-indicator">
+            <span class="arrow">↑</span> You are here: <strong>${results.totalScore}/44</strong>
+          </div>
+        </div>
+
+        <div class="score-cards-row">
+          <div class="score-card-simple ${results.psychologicalClass}">
+            <div class="card-icon">🧠</div>
+            <div class="card-info">
+              <div class="card-domain">Psychological</div>
+              <div class="card-details"><span class="card-severity-inline">${results.psychologicalSeverity}</span> · <span class="card-score">${results.psychologicalScore}/16</span></div>
+            </div>
+          </div>
+
+          <div class="score-card-simple ${results.somaticClass}">
+            <div class="card-icon">💪</div>
+            <div class="card-info">
+              <div class="card-domain">Somatic</div>
+              <div class="card-details"><span class="card-severity-inline">${results.somaticSeverity}</span> · <span class="card-score">${results.somaticScore}/16</span></div>
+            </div>
+          </div>
+
+          <div class="score-card-simple ${results.urogenitalClass}">
+            <div class="card-icon">🌸</div>
+            <div class="card-info">
+              <div class="card-domain">Urogenital</div>
+              <div class="card-details"><span class="card-severity-inline">${results.urogenitalSeverity}</span> · <span class="card-score">${results.urogenitalScore}/12</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scientific-note">
+          <em>Based on the <a href="https://www.menopause-rating-scale.info/" target="_blank" rel="noopener noreferrer">Menopause Rating Scale (MRS)</a>, an internationally validated clinical tool that reflects the overall intensity of your menopause symptoms and how they may affect your daily life.</em>
+        </div>
+
+        <div class="cta-text">
+          Download the full report for a more detailed breakdown and guidance.
+        </div>
+      `;
+
+      addMessage(resultMessage, true, true, [
+        { text: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-15"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Download Full Report (PDF)', primary: true, onclick: 'downloadPDF()' }
+      ]);
+    }
+
+    // Get Recommendation based on MRS clinical standards
+    function getRecommendation(results) {
+      // Severe: total >= 16
+      if (results.totalScore >= 16) {
+        return `Your score indicates significant menopausal symptoms. I strongly recommend scheduling an appointment with your healthcare provider as soon as possible.`;
+      }
+      
+      // Treatment indicated: total >= 14 OR any single item >= 4
+      if (results.totalScore >= 14 || results.maxItemScore >= 4) {
+        return `Your score indicates treatment for menopausal symptoms would be beneficial. I recommend consulting with your healthcare provider to discuss your options.`;
+      }
+      
+      // Moderate: 9-13
+      if (results.totalScore >= 9) {
+        return `Your symptoms are at a moderate level. Consider discussing these with your healthcare provider, especially if they're affecting your daily life.`;
+      }
+      
+      // Mild: 5-8
+      if (results.totalScore >= 5) {
+        return `You're experiencing mild symptoms. Lifestyle modifications may help, but if symptoms persist or worsen, consult your healthcare provider.`;
+      }
+      
+      // No/Little: 0-4
+      return `Your symptoms are minimal. Continue your healthy lifestyle habits and regular check-ups.`;
+    }
+
+    // Download PDF
+    async function downloadPDF() {
+      addMessage('I want to download the PDF', false);
+      
+      const loading = addLoadingMessage();
+      
+      try {
+        const response = await fetch('/generate_pdf', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(questionnaireData)
+        });
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Thalia_MRS_Assessment_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+
+          removeLoadingMessage();
+          addMessage('✅ Your PDF report has been generated! The download should begin automatically. You can save this report to share with your doctor or track your health changes over time.');
+        } else {
+          throw new Error('PDF generation failed');
+        }
+      } catch (error) {
+        removeLoadingMessage();
+        addMessage('Sorry, there was an issue generating the PDF. Please try again later or contact support for assistance.');
+        console.error(error);
+      }
+    }
+
+    // Show Improvement Plan
+    function showImprovementPlan() {
+      addMessage('I want to learn about treatment options', false);
+      
+      setTimeout(() => {
+        addMessage(`Based on your assessment results, here are some evidence-based strategies you can start implementing today:
+
+<strong>🌙 Improve Sleep Quality</strong>
+• Maintain a consistent sleep schedule
+• Avoid screens 1 hour before bedtime
+• Keep your bedroom cool, dark, and quiet
+
+<strong>🥗 Dietary Adjustments</strong>
+• Increase soy products (contain natural phytoestrogens)
+• Ensure adequate calcium and vitamin D intake
+• Reduce caffeine and spicy foods
+
+<strong>💪 Regular Exercise</strong>
+• At least 150 minutes of moderate activity per week
+• Yoga and tai chi can help reduce stress
+• Strength training helps maintain bone density
+
+<strong>🧘‍♀️ Stress Management</strong>
+• Try meditation or deep breathing exercises
+• Cultivate hobbies and interests
+• Maintain good communication with family and friends
+
+Which area would you like to start with? I can create a more detailed plan for you!`, true, true, [
+          { text: 'Create Sleep Improvement Plan', primary: true, onclick: 'createSleepPlan()' },
+          { text: 'View Nutrition Guidelines', primary: false, onclick: 'showDietPlan()' }
+        ]);
+      }, 500);
+    }
+
+    function createSleepPlan() {
+      addMessage('I want to improve my sleep', false);
+      setTimeout(() => {
+        addMessage(`Great! I'll create a personalized sleep improvement plan for you. This feature is coming soon—stay tuned! 💜`);
+      }, 500);
+    }
+
+    function showDietPlan() {
+      addMessage('I want to see nutrition guidelines', false);
+      setTimeout(() => {
+        addMessage(`Perfect! I'll recommend nutrition plans suitable for menopause. This feature is coming soon—stay tuned! 💜`);
+      }, 500);
+    }
+
+    // Initialize App
+    showWelcomeMessage();
+  </script>
+</body>
+</html>
