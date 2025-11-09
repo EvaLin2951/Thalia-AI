@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Symptom Logs - Thalia</title>
+  <style>
+    :root {
+      --purple: #6a1b9a;
+      --purple-light: #a65cc3;
+      --purple-bg: #f5f0f8;
+      --blue-accent: #2ba4e0;
+      --ink: #2f2a3a;
+      --ink-muted: #5e566b;
+      --surface: #ffffff;
+      --border: #e8e4ee;
+      --shadow: rgba(106, 27, 154, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #fef5fb 0%, #f0f8fc 100%);
+      min-height: 100vh;
+      display: flex;
+      color: var(--ink);
+    }
+
+    .sidebar {
+      width: 240px;
+      background: white;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+    }
+
+    .sidebar-logo {
+      padding: 0 20px;
+      margin-bottom: 32px;
+    }
+
+    .sidebar-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--purple);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+    }
+
+    .nav-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      color: var(--ink-muted);
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover {
+      background: var(--purple-bg);
+      color: var(--purple);
+    }
+
+    .nav-item.active {
+      background: var(--purple-bg);
+      color: var(--purple);
+      border-left-color: var(--purple);
+      font-weight: 600;
+    }
+
+    .user-info {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .user-info:hover {
+      background: var(--purple-bg);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d946bf, #2ba4e0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .user-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-email {
+      font-size: 12px;
+      color: var(--ink-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .main-container {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    .header {
+      margin-bottom: 32px;
+    }
+
+    .title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--ink-muted);
+    }
+
+    .section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 12px var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      background: #f57c00;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    .pending-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pending-item {
+      background: #fff8e1;
+      border: 2px solid #ffc107;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .pending-icon {
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+
+    .pending-content {
+      flex: 1;
+    }
+
+    .pending-symptom {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .pending-details {
+      font-size: 14px;
+      color: var(--ink-muted);
+      margin-bottom: 8px;
+    }
+
+    .pending-context {
+      font-size: 13px;
+      color: #f57c00;
+      font-style: italic;
+      margin-bottom: 12px;
+    }
+
+    .severity-options {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .severity-btn {
+      padding: 6px 12px;
+      border: 2px solid var(--border);
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .severity-btn:hover {
+      border-color: var(--purple);
+      background: var(--purple-bg);
+    }
+
+    .severity-btn.selected {
+      border-color: var(--purple);
+      background: var(--purple);
+      color: white;
+    }
+
+    .pending-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #d946bf, #2ba4e0);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.02);
+      box-shadow: 0 5px 15px rgba(217,70,191,.28);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #666;
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: #f5f5f5;
+    }
+
+    .quick-log {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .symptom-checkbox {
+      background: var(--purple-bg);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .symptom-checkbox:hover {
+      border-color: var(--purple);
+      transform: translateY(-2px);
+    }
+
+    .symptom-checkbox.selected {
+      border-color: var(--purple);
+      background: var(--purple);
+      color: white;
+    }
+
+    .symptom-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .symptom-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--ink-muted);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-text {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--purple);
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: none;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+      padding: 12px;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-title">🌸 Thalia</div>
+    </div>
+    
+    <div class="sidebar-nav">
+      <div class="nav-item" onclick="navigateTo('chat')">
+        <span>💬</span>
+        <span>Chat</span>
+      </div>
+      <div class="nav-item" onclick="navigateTo('dashboard')">
+        <span>📊</span>
+        <span>Dashboard</span>
+      </div>
+      <div class="nav-item active" onclick="navigateTo('logs')">
+        <span>📝</span>
+        <span>Logs</span>
+      </div>
+    </div>
+
+    <div class="user-info" id="userInfo" onclick="showUserMenu()">
+      <!-- User info will be loaded here -->
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="header">
+      <h1 class="title">📝 Symptom Logs</h1>
+      <p class="subtitle">Confirm detected symptoms and manually log new ones</p>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <span>⏳</span>
+          <span>Pending Confirmation</span>
+          <span class="badge" id="pendingBadge">0</span>
+        </div>
+      </div>
+      <div id="pendingList"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <span>✏️</span>
+          <span>Quick Log</span>
+        </div>
+      </div>
+      <div class="quick-log" id="quickLog"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="logModal">
+    <div class="modal-content">
+      <h2 class="modal-title" id="modalTitle">Log Symptom</h2>
+      
+      <div class="form-group">
+        <label class="form-label">Severity</label>
+        <div class="severity-options" id="modalSeverity">
+          <button class="severity-btn" onclick="selectModalSeverity(this, 1)">Mild</button>
+          <button class="severity-btn" onclick="selectModalSeverity(this, 2)">Moderate</button>
+          <button class="severity-btn" onclick="selectModalSeverity(this, 3)">Severe</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-textarea" id="modalNote" rows="3" placeholder="Any additional details..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitManualLog()">Log It</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let currentModalSymptom = null;
+
+    const symptomIcons = {
+      'Hot Flash': '🔥',
+      'Night Sweat': '💧',
+      'Sleep Issue': '😴',
+      'Mood': '😢',
+      'Anxiety': '😰',
+      'Irritability': '😠',
+      'Fatigue': '😫',
+      'Headache': '🤕',
+      'Joint Pain': '🦴',
+      'Memory': '🧠'
+    };
+
+    const symptomDimensions = {
+      'Hot Flash': { dimension: 'somatic', mrs_question: 'q1' },
+      'Night Sweat': { dimension: 'somatic', mrs_question: 'q1' },
+      'Sleep Issue': { dimension: 'somatic', mrs_question: 'q3' },
+      'Mood': { dimension: 'psychological', mrs_question: 'q4' },
+      'Anxiety': { dimension: 'psychological', mrs_question: 'q6' },
+      'Irritability': { dimension: 'psychological', mrs_question: 'q5' },
+      'Fatigue': { dimension: 'psychological', mrs_question: 'q7' },
+      'Headache': { dimension: 'somatic', mrs_question: 'q2' },
+      'Joint Pain': { dimension: 'somatic', mrs_question: 'q11' },
+      'Memory': { dimension: 'psychological', mrs_question: 'q7' }
+    };
+
+    function navigateTo(page) {
+      if (page === 'chat') {
+        window.location.href = 'index.html';
+      } else if (page === 'dashboard') {
+        window.location.href = 'dashboard.html';
+      } else if (page === 'logs') {
+        return;
+      }
+    }
+
+    function showUserMenu() {
+      if (confirm('Log out and return to login page?')) {
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+      }
+    }
+
+    function loadUserInfo() {
+      const userInfo = document.getElementById('userInfo');
+      const userJson = sessionStorage.getItem('currentUser');
+      
+      if (!userJson) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      currentUser = JSON.parse(userJson);
+      const initials = currentUser.name.split(' ').map(n => n[0]).join('');
+      
+      userInfo.innerHTML = `
+        <div class="user-avatar">${initials}</div>
+        <div class="user-details">
+          <div class="user-name">${currentUser.name}</div>
+          <div class="user-email">${currentUser.email}</div>
+        </div>
+      `;
+    }
+
+    function loadPendingLogs() {
+      const pendingList = document.getElementById('pendingList');
+      const pendingBadge = document.getElementById('pendingBadge');
+      const logs = JSON.parse(localStorage.getItem(`pending_logs_${currentUser.id}`) || '[]');
+      
+      const pending = logs.filter(log => log.status === 'pending');
+      pendingBadge.textContent = pending.length;
+
+      if (pending.length === 0) {
+        pendingList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">✅</div>
+            <div class="empty-text">
+              No pending confirmations.<br>
+              Symptoms detected in chat will appear here!
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      pendingList.innerHTML = pending.map((log, index) => `
+        <div class="pending-item" id="pending-${index}">
+          <div class="pending-icon">${symptomIcons[log.symptom] || '💊'}</div>
+          <div class="pending-content">
+            <div class="pending-symptom">${log.symptom}</div>
+            <div class="pending-details">
+              Detected ${new Date(log.timestamp).toLocaleDateString()} at ${new Date(log.timestamp).toLocaleTimeString()}
+            </div>
+            ${log.chat_context ? `<div class="pending-context">"${log.chat_context}"</div>` : ''}
+            <div class="severity-options">
+              <button class="severity-btn${log.severity === 1 ? ' selected' : ''}" onclick="selectPendingSeverity(${index}, this, 1)">Mild</button>
+              <button class="severity-btn${log.severity === 2 ? ' selected' : ''}" onclick="selectPendingSeverity(${index}, this, 2)">Moderate</button>
+              <button class="severity-btn${log.severity === 3 ? ' selected' : ''}" onclick="selectPendingSeverity(${index}, this, 3)">Severe</button>
+            </div>
+            <div class="pending-actions">
+              <button class="btn btn-primary" onclick="confirmLog(${index})">✓ Confirm</button>
+              <button class="btn btn-secondary" onclick="dismissLog(${index})">✗ Dismiss</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectPendingSeverity(index, btn, severity) {
+      const siblings = btn.parentElement.querySelectorAll('.severity-btn');
+      siblings.forEach(s => s.classList.remove('selected'));
+      btn.classList.add('selected');
+      
+      const logs = JSON.parse(localStorage.getItem(`pending_logs_${currentUser.id}`) || '[]');
+      const pending = logs.filter(log => log.status === 'pending');
+      pending[index].severity = severity;
+      
+      const allLogs = logs.filter(log => log.status !== 'pending').concat(pending);
+      localStorage.setItem(`pending_logs_${currentUser.id}`, JSON.stringify(allLogs));
+    }
+
+    function confirmLog(index) {
+      const logs = JSON.parse(localStorage.getItem(`pending_logs_${currentUser.id}`) || '[]');
+      const pending = logs.filter(log => log.status === 'pending');
+      const log = pending[index];
+      
+      if (!log.severity) {
+        alert('Please select a severity level');
+        return;
+      }
+      
+      const confirmedLog = {
+        ...log,
+        ...symptomDimensions[log.symptom],
+        status: 'confirmed',
+        confirmed_at: new Date().toISOString()
+      };
+      
+      const confirmed = JSON.parse(localStorage.getItem(`confirmed_logs_${currentUser.id}`) || '[]');
+      confirmed.push(confirmedLog);
+      localStorage.setItem(`confirmed_logs_${currentUser.id}`, JSON.stringify(confirmed));
+      
+      const remaining = logs.filter((l, i) => {
+        if (l.status !== 'pending') return true;
+        const pendingIndex = logs.filter(x => x.status === 'pending').indexOf(l);
+        return pendingIndex !== index;
+      });
+      localStorage.setItem(`pending_logs_${currentUser.id}`, JSON.stringify(remaining));
+      
+      loadPendingLogs();
+      window.dispatchEvent(new Event('logsUpdated'));
+    }
+
+    function dismissLog(index) {
+      const logs = JSON.parse(localStorage.getItem(`pending_logs_${currentUser.id}`) || '[]');
+      const pending = logs.filter(log => log.status === 'pending');
+      
+      const remaining = logs.filter((l, i) => {
+        if (l.status !== 'pending') return true;
+        const pendingIndex = logs.filter(x => x.status === 'pending').indexOf(l);
+        return pendingIndex !== index;
+      });
+      localStorage.setItem(`pending_logs_${currentUser.id}`, JSON.stringify(remaining));
+      
+      loadPendingLogs();
+    }
+
+    function loadQuickLog() {
+      const quickLog = document.getElementById('quickLog');
+      const symptoms = Object.keys(symptomIcons);
+      
+      quickLog.innerHTML = symptoms.map(symptom => `
+        <div class="symptom-checkbox" onclick="openManualLog('${symptom}')">
+          <div class="symptom-icon">${symptomIcons[symptom]}</div>
+          <div class="symptom-name">${symptom}</div>
+        </div>
+      `).join('');
+    }
+
+    function openManualLog(symptom) {
+      currentModalSymptom = symptom;
+      document.getElementById('modalTitle').textContent = `Log ${symptom}`;
+      document.getElementById('modalNote').value = '';
+      document.querySelectorAll('#modalSeverity .severity-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      document.getElementById('logModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('logModal').classList.remove('active');
+      currentModalSymptom = null;
+    }
+
+    function selectModalSeverity(btn, severity) {
+      const siblings = btn.parentElement.querySelectorAll('.severity-btn');
+      siblings.forEach(s => s.classList.remove('selected'));
+      btn.classList.add('selected');
+      btn.dataset.severity = severity;
+    }
+
+    function submitManualLog() {
+      const selectedBtn = document.querySelector('#modalSeverity .severity-btn.selected');
+      const note = document.getElementById('modalNote').value;
+      
+      if (!selectedBtn) {
+        alert('Please select a severity level');
+        return;
+      }
+      
+      const severity = parseInt(selectedBtn.dataset.severity);
+      
+      const log = {
+        symptom: currentModalSymptom,
+        severity: severity,
+        note: note,
+        timestamp: new Date().toISOString(),
+        log_method: 'manual',
+        ...symptomDimensions[currentModalSymptom],
+        status: 'confirmed'
+      };
+      
+      const confirmed = JSON.parse(localStorage.getItem(`confirmed_logs_${currentUser.id}`) || '[]');
+      confirmed.push(log);
+      localStorage.setItem(`confirmed_logs_${currentUser.id}`, JSON.stringify(confirmed));
+      
+      closeModal();
+      window.dispatchEvent(new Event('logsUpdated'));
+      
+      alert(`✅ ${currentModalSymptom} logged successfully!`);
+    }
+
+    loadUserInfo();
+    loadPendingLogs();
+    loadQuickLog();
+
+    window.addEventListener('pendingLogsUpdated', loadPendingLogs);
+
+    setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadPendingLogs();
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
