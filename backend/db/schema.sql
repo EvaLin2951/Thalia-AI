@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS pdf_documents (
     file_name VARCHAR(255) NOT NULL UNIQUE,
     title VARCHAR(255) NULL, 
     authors VARCHAR(512) NULL,
-    journal VARCHAR(255) NULL,
+    journal VARCHAR(500) NULL,
     year INT NULL, 
     doi VARCHAR(255) NULL,
     content LONGTEXT NOT NULL,
