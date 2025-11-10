@@ -9,11 +9,15 @@ import sys
 # print("----------------------------\n")
 
 
-# to get current pathway
+# 获取当前脚本的绝对路径
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
 
+# 计算项目根目录 (Thalia) 的路径
+# current_script_dir 是 /Users/.../Thalia/RAG
+# current_script_dir 的上一级是 /Users/.../Thalia
 project_root_dir = os.path.join(current_script_dir, "..")
 
+# 将项目根目录添加到 Python 的模块搜索路径
 sys.path.append(project_root_dir)
 
 
@@ -104,12 +108,6 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.5)
 retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
 template = """You are a compassionate and knowledgeable menopause support assistant.
-
-Before answering, please:
-1. Analyze the user's query to understand their core intent
-2. If the query is vague or uses colloquial terms, mentally rephrase it using proper medical terminology
-3. Consider related menopause symptoms or concerns that might be relevant
-4. If the query is incomplete, use your menopause knowledge to provide comprehensive context
 
 You provide responses in different helpful tones depending on the situation.
 

@@ -1,30 +1,33 @@
-
-
 import os
 import sys
+from dotenv import load_dotenv
+import fitz  # PyMuPDF, for extracting text from PDFs
 
-# print("\n--- sys.path for debugging ---")
-# for p in sys.path:
-#     print(p)
-# print("----------------------------\n")
+# Langchain imports
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
 
-
-# to get current pathway
+# Get the absolute path of the current script
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
 
+# Calculate the project root directory (Thalia) path
 project_root_dir = os.path.join(current_script_dir, "..")
 
+# Add the project root directory to Python's module search path
 sys.path.append(project_root_dir)
 
-
-
 # --- 1. Configuration ---
-from dotenv import load_dotenv
 persist_directory = "./chroma_db"
 
 load_dotenv()
 
-print("❗️ Please ensure all necessary libraries are installed via pip install.")
+print("Please ensure all necessary libraries are installed via pip install.")
 # ----------------------------------------------------
 
 # --- 2. Connecting to Gemini API ---
@@ -32,30 +35,47 @@ gemini_api_key = os.getenv("GOOGLE_API_KEY")
 
 if gemini_api_key:
     os.environ["GOOGLE_API_KEY"] = gemini_api_key
-    print("✅ Google API Key has been successfully loaded from environment or .env file.")
+    print("Google API Key has been successfully loaded from environment or .env file.")
 else:
     print("Warning: GOOGLE_API_KEY environment variable not set. Please set it to proceed.")
     print("Exiting script. Please set GOOGLE_API_KEY and restart.")
     exit()
 # ----------------------------------------------------
 
-# --- 3. Documents/Database Loading ---
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.documents import Document
-from db.fetch_pdfs import fetch_pdf_texts
+# --- 3. Document Loading from Local PDFs ---
+# Define the path to the PDF folder. Assumes RAG_database is inside the RAG folder.
+pdf_folder = os.path.join(current_script_dir, "RAG_database")
 
-print("Loading documents from MySQL database...")
-try:
-    db_documents = fetch_pdf_texts()
-    documents = []
-    for doc in db_documents:
-        documents.append(Document(page_content=doc['content'], metadata={"source": doc['file_name']}))
-    
-    print(f"✅ Loaded {len(documents)} documents from the database.")
-except Exception as e:
-    print(f"Error loading documents from database: {e}")
-    print("Please ensure your MySQL database is running and accessible, and 'pdf_documents' table exists.")
-    print("Exiting script. Please check your database connection.")
+def extract_text_from_pdf(file_path):
+    """Extracts all text from a single PDF file using PyMuPDF (fitz)."""
+    try:
+        doc = fitz.open(file_path)
+        text = "\n".join(page.get_text() for page in doc)
+        doc.close()
+        return text
+    except Exception as e:
+        print(f"Error extracting text from {file_path}: {e}")
+        return None
+
+print(f"Loading documents from local PDF folder: {pdf_folder}...")
+documents = []
+if os.path.exists(pdf_folder):
+    for filename in os.listdir(pdf_folder):
+        if filename.endswith(".pdf"):
+            file_path = os.path.join(pdf_folder, filename)
+            content = extract_text_from_pdf(file_path)
+            if content:
+                documents.append(Document(page_content=content, metadata={"source": filename}))
+    print(f"Loaded {len(documents)} documents from local PDFs.")
+else:
+    print(f"Error: PDF folder not found at {pdf_folder}.")
+    print("Please ensure 'RAG_database' folder exists and contains PDF files.")
+    print("Exiting script.")
+    exit()
+
+if not documents:
+    print("No documents were loaded from the PDF folder. Please check if the folder contains valid PDF files.")
+    print("Exiting script.")
     exit()
 
 text_splitter = RecursiveCharacterTextSplitter(
@@ -75,9 +95,6 @@ else:
 
 
 # --- 4. Import embedding model and vector store ---
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_community.vectorstores import Chroma
-
 print("Initializing Gemini Embedding Model and creating Vector Store...")
 embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
 
@@ -88,30 +105,36 @@ else:
     print(f"Creating new vector store and saving to: {persist_directory}")
     vectorstore = Chroma.from_documents(texts, embeddings, persist_directory=persist_directory)
 
-print(f"✅ All {len(texts)} text chunks successfully embedded and stored in a single vector store!")
+print(f"All {len(texts)} text chunks successfully embedded and stored in a single vector store!")
 print(f"Vector store saved to: {persist_directory}")
 # ----------------------------------------------------
 
 
 # --- 5. Import LLM model and RAG chain components ---
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
-
 print("Initializing Gemini LLM Model and building RAG chain...")
 llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.5)
 retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
 template = """You are a compassionate and knowledgeable menopause support assistant.
 
-Before answering, please:
-1. Analyze the user's query to understand their core intent
-2. If the query is vague or uses colloquial terms, mentally rephrase it using proper medical terminology
-3. Consider related menopause symptoms or concerns that might be relevant
-4. If the query is incomplete, use your menopause knowledge to provide comprehensive context
+Please answer using simple, everyday language. If any medical terms are necessary, briefly explain them in plain words or with relatable examples. Your goal is to make the explanation clear and comforting for someone with no medical background.
 
-You provide responses in different helpful tones depending on the situation.
+You respond based on the user's intent and emotional state, using the appropriate tone and flow:
+
+---
+
+Knowledge Query Flow
+Use an **Expert** or **Blended** tone. Focus on factual accuracy, medical clarity, and helpful explanations based on retrieved knowledge. Avoid speculation.
+
+---
+
+Emotional Support Flow
+Use a **Warm Empathetic** or **Blended** tone. Focus on validation, emotional comfort, and supportive suggestions. Include resource guidance where helpful (e.g., support groups, hotlines, symptom trackers).
+
+---
+
+Out-of-Scope Requests
+Use a **Warm** tone with a clear boundary explanation. Kindly inform the user that their request is outside the assistant's capability, and offer helpful directions or referrals.
 
 ---
 
@@ -180,6 +203,32 @@ You're absolutely not alone, even if it feels that way. So many women go through
 
 ---
 
+[Blended Style Example – Emotional Support + Knowledge]
+
+Context:
+User feels overwhelmed and confused by menopausal symptoms.
+
+Question:
+I'm scared and confused about these symptoms. Why do I feel so lost during menopause?
+
+Answer:
+It’s completely understandable to feel lost during menopause — your body is going through major changes, and it can affect your emotions, energy, and clarity. Many women feel overwhelmed at this stage. On a medical level, hormone shifts — especially the drop in estrogen — can impact mood regulation, sleep, and mental clarity. If you feel ready, journaling your symptoms and talking to a supportive doctor can really help. You're not alone — we can take it one step at a time.
+
+---
+
+[Boundary Explanation Example – Out-of-Scope Request]
+
+Context:
+User asks for a diagnosis or prescription.
+
+Question:
+Can you tell me if I have menopause or prescribe me HRT?
+
+Answer:
+I'm here to provide information and support, but I’m not a licensed medical provider, so I can’t offer a diagnosis or prescribe medication. I encourage you to reach out to a trusted healthcare professional — they can give you personalized advice based on your medical history. If you'd like, I can help you prepare questions to bring to your appointment.
+
+---
+
 
 Now, based on the following context and user question, please respond in a helpful, appropriate tone (expert, warm, or blended):
 
@@ -190,6 +239,7 @@ Question:
 {question}
 
 Answer:"""
+
 prompt = ChatPromptTemplate.from_template(template)
 
 def format_docs(docs):
@@ -210,7 +260,7 @@ def test_rag_local_output():
     """
     Tests the RAG chain with predefined questions and prints responses to the console.
     """
-    print("\n--- Testing RAG Chain (SQL Output) ---")
+    print("\n--- Testing RAG Chain (Local Output) ---")
 
     questions = [
         "What are the impact of menopause?",
@@ -228,7 +278,7 @@ def test_rag_local_output():
         response = rag_chain.invoke(question)
         print(f"Answer: {response}")
 
-    print("\n ✅ RAG pipeline setup complete. SQL RAG testing finished.")
+    print("\nRAG pipeline setup complete. Local testing finished.")
 
 if __name__ == "__main__":
     test_rag_local_output()
