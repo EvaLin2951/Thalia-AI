@@ -91,7 +91,7 @@ else:
 
             # --- 4. Import embedding model and vector store ---
             from langchain_google_genai import GoogleGenerativeAIEmbeddings
-            from langchain_community.vectorstores import Chroma
+            from langchain_chroma import Chroma
 
             print("Initializing Gemini Embedding Model and creating Vector Store...")
             embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
