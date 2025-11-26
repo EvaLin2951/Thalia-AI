@@ -1,0 +1,2411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Symptom Logs - Thalia</title>
+  <style>
+    :root {
+      --purple: #6a1b9a;
+      --purple-light: #a65cc3;
+      --purple-bg: #f5f0f8;
+      --blue-accent: #2ba4e0;
+      --ink: #2f2a3a;
+      --ink-muted: #5e566b;
+      --surface: #ffffff;
+      --border: #e8e4ee;
+      --shadow: rgba(106, 27, 154, 0.15);
+
+      /* Icon colors */
+      --icon-red: #f44336;
+      --icon-pink: #e91e63;
+      --icon-blue: #2196f3;
+      --icon-indigo: #3f51b5;
+      --icon-purple: #9c27b0;
+      --icon-grey-blue: #607d8b;
+      --icon-orange: #ff9800;
+      --icon-yellow: #ffc107;
+      --icon-brown: #795548;
+      --icon-cyan: #00bcd4;
+
+      /* Category badge colors */
+      --somatic-bg: #fff3e0;
+      --somatic-text: #e65100;
+      --psychological-bg: #f3e5f5;
+      --psychological-text: #6a1b9a;
+      --urogenital-bg: #e3f2fd;
+      --urogenital-text: #1565c0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #fef5fb 0%, #f0f8fc 100%);
+      min-height: 100vh;
+      display: flex;
+      color: var(--ink);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 100vh;
+      background: white;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      padding: 0 20px;
+      margin-bottom: 32px;
+    }
+
+    .sidebar-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--purple);
+      font-family: 'Arial Narrow', Arial, sans-serif;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+    }
+
+    .nav-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      color: var(--ink-muted);
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      flex-shrink: 0;
+    }
+
+    .nav-item:hover {
+      background: var(--purple-bg);
+      color: var(--purple);
+    }
+
+    .nav-item.active {
+      background: var(--purple-bg);
+      color: var(--purple);
+      border-left-color: var(--purple);
+      font-weight: 600;
+    }
+
+    .user-info {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .user-info:hover {
+      background: var(--purple-bg);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d946bf, #2ba4e0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .user-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-email {
+      font-size: 12px;
+      color: var(--ink-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Main Container */
+    .main-container {
+      margin-left: 240px;
+      padding: 40px;
+      overflow-y: auto;
+      width: calc(100% - 240px);
+      min-height: 100vh;
+    }
+
+    /* Page Header */
+    .page-header {
+      text-align: left;
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--purple);
+      margin: 0 0 8px 0;
+    }
+
+    .page-subtitle {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      margin: 0;
+    }
+
+    /* Date Navigation */
+    .date-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 32px;
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      box-shadow: none;
+      position: relative;
+    }
+
+    .date-nav-btn {
+      background: transparent;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--ink-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .date-nav-btn:hover:not(:disabled) {
+      background: var(--purple);
+      color: white;
+    }
+
+    .date-nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .date-display {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      min-width: 250px;
+      text-align: center;
+    }
+
+    .date-display:hover {
+      background: var(--purple-bg);
+    }
+
+    .date-status {
+      font-size: 13px;
+      color: var(--ink-muted);
+      margin-left: 8px;
+    }
+
+    /* Main Card (Container for small cards) */
+    .main-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 12px var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .main-card-header {
+      margin-bottom: 20px;
+    }
+
+    .main-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+      text-align: left;
+      margin-bottom: 0;
+    }
+
+    .week-info {
+      font-size: 14px;
+      color: var(--ink-muted);
+      margin-top: 8px;
+      text-align: left;
+    }
+
+    /* Small Cards Grid */
+    .cards-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .cards-grid.single-row {
+      flex-wrap: nowrap;
+    }
+
+    .cards-grid.two-rows {
+      flex-wrap: wrap;
+    }
+
+    /* Small Card */
+    .small-card {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      flex: 1;
+      min-width: 200px;
+      height: 200px;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .small-card.editing {
+      height: auto;
+      min-height: 200px;
+    }
+
+
+    .small-card.logged {
+      background: var(--purple-bg);
+      border-color: var(--purple);
+    }
+
+    .small-card.expanded {
+      height: auto;
+      min-height: 200px;
+      box-shadow: 0 6px 20px var(--shadow);
+    }
+
+    /* For two-row layout, force 3 cards per row */
+    .cards-grid.two-rows .small-card {
+      flex: 1 1 calc(33.333% - 11px);
+      max-width: calc(33.333% - 11px);
+    }
+
+    /* Card Header */
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .card-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .card-title-area {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+
+    .category-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .category-badge.somatic {
+      background: var(--somatic-bg);
+      color: var(--somatic-text);
+    }
+
+    .category-badge.psychological {
+      background: var(--psychological-bg);
+      color: var(--psychological-text);
+    }
+
+    .category-badge.urogenital {
+      background: var(--urogenital-bg);
+      color: var(--urogenital-text);
+    }
+
+    /* Card Content */
+    .card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .card-info {
+      font-size: 13px;
+      color: var(--ink-muted);
+      margin-bottom: 8px;
+    }
+
+    .card-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .severity-stars {
+      color: #ffc107;
+      letter-spacing: 1px;
+    }
+
+    .severity-text {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .notes {
+      font-size: 13px;
+      color: var(--ink-muted);
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .logged-time {
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin-bottom: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+      border: none;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #d946bf, #2ba4e0);
+      color: white;
+      padding: 10px 18px;
+      box-shadow: 0 4px 12px rgba(217, 70, 191, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(217, 70, 191, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--ink-muted);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--purple-bg);
+      border-color: var(--purple-light);
+      color: var(--purple);
+    }
+
+    /* Button Container for side-by-side layout */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      align-items: center;
+    }
+
+    .button-group .btn {
+      flex: 1 0 auto;
+    }
+
+    /* Outline button style for View/Hide Details and Edit */
+    .btn-outline {
+      background: white;
+      color: var(--ink-muted);
+      border: 2px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .btn-outline:hover {
+      background: var(--purple-bg);
+      border-color: var(--purple-light);
+      color: var(--purple);
+    }
+
+    .btn-text {
+      background: none;
+      border: none;
+      color: var(--purple);
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      margin-top: auto;
+    }
+
+    .btn-text:hover {
+      background: var(--purple-bg);
+    }
+
+    /* Event Details */
+    .event-details {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .event-list {
+      margin-bottom: 12px;
+    }
+
+    .event-item {
+      display: grid;
+      grid-template-columns: 70px 90px 1fr 24px;
+      gap: 12px;
+      align-items: center;
+      padding: 6px 12px;
+      background: var(--purple-bg);
+      border-radius: 8px;
+      margin-bottom: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .event-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .event-item:hover {
+      background: #f0ebf5;
+    }
+
+    .event-content {
+      display: contents;
+    }
+
+    .event-time {
+      font-weight: 600;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .event-severity {
+      font-weight: 600;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .event-notes {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .event-notes:empty::after {
+      content: '-';
+      color: var(--border);
+    }
+
+    .btn-delete {
+      background: transparent;
+      border: 2px solid transparent;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink-muted);
+    }
+
+    .btn-delete:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    .btn-delete:hover svg {
+      stroke: #ef4444;
+    }
+
+    .btn-delete-no-border:hover {
+      border-color: transparent;
+    }
+
+    /* Inline Editor */
+    .inline-editor {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .severity-selector-container {
+      margin: 6px 0 12px 0;
+    }
+
+    .severity-selector-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .severity-selector {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      justify-content: center;
+    }
+
+    .severity-dot-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .severity-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .severity-dot.filled {
+      border-color: var(--purple);
+      background: var(--purple);
+    }
+
+    .severity-dot.preview {
+      border-color: #e0c4f7;
+      background: #e0c4f7;
+    }
+
+    .severity-dot:hover {
+      border-color: #b8b8b8;
+    }
+
+    .severity-dot.filled:hover,
+    .severity-dot.preview:hover {
+      border-color: var(--purple);
+    }
+
+    .severity-dot-label {
+      font-size: 12px;
+      color: var(--ink-muted);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .editor-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 12px;
+    }
+
+    .editor-actions .btn {
+      flex: 1;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--purple);
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+
+    /* Hide time input clock icon */
+    .form-input[type="time"]::-webkit-calendar-picker-indicator {
+      display: none;
+    }
+
+    .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: none;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+    }
+
+    /* Date Picker */
+    .date-picker {
+      position: absolute;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      padding: 16px;
+      z-index: 1000;
+      display: none;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 8px;
+    }
+
+    .date-picker.active {
+      display: block;
+    }
+
+    .date-picker-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .date-picker-month {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .date-picker-nav {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px 8px;
+      color: var(--purple);
+    }
+
+    .date-picker-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .date-picker-day {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      padding: 8px;
+    }
+
+    .date-picker-date {
+      text-align: center;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .date-picker-date:hover:not(.disabled):not(.empty) {
+      background: var(--purple-bg);
+    }
+
+    .date-picker-date.today {
+      background: var(--purple-bg);
+      font-weight: 600;
+    }
+
+    .date-picker-date.selected {
+      background: var(--purple);
+      color: white;
+      font-weight: 600;
+    }
+
+    .date-picker-date.disabled {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .date-picker-date.empty {
+      cursor: default;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      background: var(--ink);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 3000;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .toast.active {
+      display: flex;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+      .cards-grid.two-rows .small-card {
+        flex: 1 1 calc(50% - 8px);
+        max-width: calc(50% - 8px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .cards-grid.single-row,
+      .cards-grid.two-rows {
+        flex-direction: column;
+      }
+
+      .cards-grid.two-rows .small-card {
+        flex: 1 1 100%;
+        max-width: 100%;
+      }
+
+      .small-card {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-title">THALIA</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="logs.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        Journal
+      </a>
+      <a href="dashboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        Dashboard
+      </a>
+      <a href="index.html" class="nav-item">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        Companion
+      </a>
+    </nav>
+
+    <div class="user-info" id="userInfo" onclick="showUserMenu()">
+      <!-- User info will be loaded here -->
+    </div>
+  </div>
+
+  <div class="main-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">Journal</h1>
+      <p class="page-subtitle">Log symptoms and notes</p>
+    </div>
+
+    <!-- Date Navigation -->
+    <div class="date-nav">
+      <button class="date-nav-btn" id="prevDayBtn" onclick="changeDate(-1)">‹</button>
+      <div class="date-display" id="dateDisplay" onclick="toggleDatePicker()">
+        <span id="dateText">November 9, 2025</span>
+        <span class="date-status" id="dateStatus"></span>
+      </div>
+      <button class="date-nav-btn" id="nextDayBtn" onclick="changeDate(1)">›</button>
+
+      <!-- Date Picker -->
+      <div class="date-picker" id="datePicker">
+        <div class="date-picker-header">
+          <button class="date-picker-nav" onclick="changePickerMonth(-1)">‹</button>
+          <span class="date-picker-month" id="pickerMonth">November 2025</span>
+          <button class="date-picker-nav" onclick="changePickerMonth(1)">›</button>
+        </div>
+        <div class="date-picker-grid" id="pickerGrid">
+          <!-- Calendar will be rendered here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Tracking -->
+    <div class="main-card">
+      <div class="main-card-header">
+        <h2 class="main-card-title">TRACK EVENTS</h2>
+      </div>
+      <div class="cards-grid single-row" id="eventCards">
+        <!-- Event cards will be rendered here -->
+      </div>
+    </div>
+
+    <!-- Daily Reflection -->
+    <div class="main-card">
+      <div class="main-card-header">
+        <h2 class="main-card-title">DAILY SUMMARY</h2>
+      </div>
+      <div class="cards-grid two-rows" id="dailyCards">
+        <!-- Daily cards will be rendered here -->
+      </div>
+    </div>
+
+    <!-- Weekly Summary -->
+    <div class="main-card">
+      <div class="main-card-header">
+        <h2 class="main-card-title">WEEKLY SUMMARY</h2>
+        <div class="week-info" id="weekInfo">Week of November 4 - November 10, 2025</div>
+      </div>
+      <div class="cards-grid single-row" id="weeklyCards">
+        <!-- Weekly cards will be rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Modal -->
+  <div class="modal-overlay" id="eventModal">
+    <div class="modal-content">
+      <h2 class="modal-title" id="eventModalTitle">Log Event</h2>
+
+      <div class="form-group">
+        <label class="form-label">SEVERITY</label>
+        <div class="severity-selector" id="eventSeveritySelector">
+          <div class="severity-dot-item">
+            <div class="severity-dot" data-value="1" onclick="selectSeverity('event', 1)" onmouseenter="previewSeverity('event', 1)" onmouseleave="clearPreview('event')"></div>
+            <div class="severity-dot-label">Mild</div>
+          </div>
+          <div class="severity-dot-item">
+            <div class="severity-dot" data-value="2" onclick="selectSeverity('event', 2)" onmouseenter="previewSeverity('event', 2)" onmouseleave="clearPreview('event')"></div>
+            <div class="severity-dot-label">Moderate</div>
+          </div>
+          <div class="severity-dot-item">
+            <div class="severity-dot" data-value="3" onclick="selectSeverity('event', 3)" onmouseenter="previewSeverity('event', 3)" onmouseleave="clearPreview('event')"></div>
+            <div class="severity-dot-label">Severe</div>
+          </div>
+          <div class="severity-dot-item">
+            <div class="severity-dot" data-value="4" onclick="selectSeverity('event', 4)" onmouseenter="previewSeverity('event', 4)" onmouseleave="clearPreview('event')"></div>
+            <div class="severity-dot-label">Very Severe</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">TIME</label>
+        <input type="time" class="form-input" id="eventTime">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">NOTES (OPTIONAL)</label>
+        <textarea class="form-textarea" id="eventNotes" rows="3" maxlength="200" placeholder="Any additional details..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
+        <button class="btn btn-primary" id="eventSaveBtn" onclick="saveEvent()" disabled>Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <span id="toastMessage">✓ Saved</span>
+  </div>
+
+  <script>
+    // ==================== Configuration ====================
+
+    const SYMPTOMS_CONFIG = {
+      event: [
+        {
+          id: 'hot_flashes',
+          name: 'Hot Flashes / Sweating',
+          icon: 'flame',
+          iconColor: '#f44336',
+          category: 'somatic'
+        },
+        {
+          id: 'heart_discomfort',
+          name: 'Heart Discomfort',
+          icon: 'heart',
+          iconColor: '#e91e63',
+          category: 'somatic'
+        },
+        {
+          id: 'bladder_problems',
+          name: 'Bladder Problems',
+          icon: 'droplet',
+          iconColor: '#2196f3',
+          category: 'urogenital'
+        }
+      ],
+      daily: [
+        {
+          id: 'sleep_problems',
+          name: 'Sleep Problems',
+          icon: 'moon',
+          iconColor: '#3f51b5',
+          category: 'somatic',
+          prompt: 'How did you sleep last night?'
+        },
+        {
+          id: 'joint_pain',
+          name: 'Joint / Muscular Discomfort',
+          icon: 'bone',
+          iconColor: '#9c27b0',
+          category: 'somatic',
+          prompt: 'How are you feeling today?'
+        },
+        {
+          id: 'depressive_mood',
+          name: 'Depressive Mood',
+          icon: 'cloud',
+          iconColor: '#607d8b',
+          category: 'psychological',
+          prompt: 'How are you feeling today?'
+        },
+        {
+          id: 'irritability',
+          name: 'Irritability',
+          icon: 'zap',
+          iconColor: '#ff9800',
+          category: 'psychological',
+          prompt: 'How are you feeling today?'
+        },
+        {
+          id: 'anxiety',
+          name: 'Anxiety',
+          icon: 'activity',
+          iconColor: '#ffc107',
+          category: 'psychological',
+          prompt: 'How are you feeling today?'
+        },
+        {
+          id: 'exhaustion',
+          name: 'Physical / Mental Exhaustion',
+          icon: 'battery',
+          iconColor: '#795548',
+          category: 'psychological',
+          prompt: 'How are you feeling today?'
+        }
+      ],
+      weekly: [
+        {
+          id: 'sexual_problems',
+          name: 'Sexual Problems',
+          icon: 'users',
+          iconColor: '#e91e63',
+          category: 'urogenital'
+        },
+        {
+          id: 'vaginal_dryness',
+          name: 'Vaginal Dryness',
+          icon: 'droplet',
+          iconColor: '#00bcd4',
+          category: 'urogenital'
+        }
+      ]
+    };
+
+    const SEVERITY_LABELS = {
+      0: 'None',
+      1: 'Mild',
+      2: 'Moderate',
+      3: 'Severe',
+      4: 'Very Severe'
+    };
+
+    // SVG Icons
+    const ICONS = {
+      flame: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
+      heart: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/><path d="M3.5 12h6l1.5-2 2 4 1.5-2h6.5"/></svg>`,
+      droplet: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`,
+      moon: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+      bone: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="5.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/><path d="M7.5 7.5l9 9"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="5.5" r="2.5"/><path d="M7.5 16.5l9-9"/></svg>`,
+      cloud: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="13 16 12 19 11 16"/></svg>`,
+      zap: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+      activity: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+      battery: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"/><line x1="23" y1="13" x2="23" y2="11"/><line x1="4" y1="10" x2="4" y2="14"/></svg>`,
+      users: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+      flower: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Top petal (0 degrees) -->
+        <path d="M12 12 C12 12, 10.5 8, 10 6 C9.5 4.5, 10.5 3.5, 12 3.5 C13.5 3.5, 14.5 4.5, 14 6 C13.5 8, 12 12, 12 12" fill="none"/>
+        <!-- Top-right petal (72 degrees) -->
+        <path d="M12 12 C12 12, 14.5 9, 16 7.5 C17.5 6.5, 18.5 7.5, 18.5 9 C18.5 10.5, 17.5 11.5, 16 12 C14.5 12.5, 12 12, 12 12" fill="none"/>
+        <!-- Bottom-right petal (144 degrees) -->
+        <path d="M12 12 C12 12, 15 13.5, 16.5 15 C17.5 16.5, 17 18, 15.5 18.5 C14 19, 12.5 18, 12 17 C11.5 15.5, 12 12, 12 12" fill="none"/>
+        <!-- Bottom-left petal (216 degrees) -->
+        <path d="M12 12 C12 12, 9 13.5, 7.5 15 C6.5 16.5, 7 18, 8.5 18.5 C10 19, 11.5 18, 12 17 C12.5 15.5, 12 12, 12 12" fill="none"/>
+        <!-- Top-left petal (288 degrees) -->
+        <path d="M12 12 C12 12, 9.5 9, 8 7.5 C6.5 6.5, 5.5 7.5, 5.5 9 C5.5 10.5, 6.5 11.5, 8 12 C9.5 12.5, 12 12, 12 12" fill="none"/>
+        <!-- Center stamen -->
+        <circle cx="12" cy="12" r="1.8" fill="${color}"/>
+      </svg>`,
+      humidity: (color) => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Tube -->
+        <rect x="10" y="4" width="4" height="11.5" rx="2" stroke="${color}" stroke-width="2" fill="none"/>
+        <!-- Bulb -->
+        <circle cx="12" cy="19" r="3.5" stroke="${color}" stroke-width="2" fill="none"/>
+        <!-- Tick marks -->
+        <line x1="14" y1="6" x2="16" y2="6" stroke="${color}" stroke-width="2"/>
+        <line x1="14" y1="9" x2="16" y2="9" stroke="${color}" stroke-width="2"/>
+        <line x1="14" y1="12" x2="16" y2="12" stroke="${color}" stroke-width="2"/>
+        <!-- Liquid level in bulb (cyan, ~27% of total height) -->
+        <circle cx="12" cy="19" r="2.5" fill="#00bcd4"/>
+      </svg>`,
+      trash: (color) => `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 4 4 14 12 14 13 4"/>
+        <line x1="2" y1="4" x2="14" y2="4"/>
+        <line x1="6" y1="2" x2="10" y2="2"/>
+      </svg>`
+    };
+
+    // ==================== Global State ====================
+
+    let currentUser = null;
+    let currentDate = new Date();
+    let pickerDate = new Date();
+    let currentEventSymptom = null;
+    let currentEditingEvent = null; // { symptomId, index } when editing
+    let expandedCards = new Set();
+    let currentSeverityValues = {}; // Track current severity value for each selector
+
+    // ==================== Utility Functions ====================
+
+    function formatDate(date) {
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    function formatDateISO(date) {
+      // Use local timezone instead of UTC to avoid date boundary issues
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function parseDate(dateStr) {
+      return new Date(dateStr + 'T00:00:00');
+    }
+
+    function isToday(date) {
+      const today = new Date();
+      return formatDateISO(date) === formatDateISO(today);
+    }
+
+    function isFuture(date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const checkDate = new Date(date);
+      checkDate.setHours(0, 0, 0, 0);
+      return checkDate > today;
+    }
+
+    function getWeekRange(dateStr) {
+      const date = parseDate(dateStr);
+      const day = date.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+
+      const monday = new Date(date);
+      monday.setDate(date.getDate() + diff);
+
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+
+      return {
+        start: formatDateISO(monday),
+        end: formatDateISO(sunday),
+        label: `Week of ${monday.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${sunday.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+      };
+    }
+
+    function getStars(severity) {
+      return '⭐'.repeat(severity);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      toastMessage.textContent = message;
+      toast.classList.add('active');
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 3000);
+    }
+
+    // ==================== Navigation ====================
+
+    function navigateTo(page) {
+      if (page === 'chat') {
+        window.location.href = 'index.html';
+      } else if (page === 'dashboard') {
+        window.location.href = 'dashboard.html';
+      }
+    }
+
+    function showUserMenu() {
+      if (confirm('Log out and return to login page?')) {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      }
+    }
+
+    function loadUserInfo() {
+      const userInfo = document.getElementById('userInfo');
+      const userJson = localStorage.getItem('currentUser');
+
+      if (!userJson) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      currentUser = JSON.parse(userJson);
+      const initials = currentUser.name.split(' ').map(n => n[0]).join('');
+
+      userInfo.innerHTML = `
+        <div class="user-avatar">${initials}</div>
+        <div class="user-details">
+          <div class="user-name">${currentUser.name}</div>
+          <div class="user-email">${currentUser.email}</div>
+        </div>
+      `;
+    }
+
+    // ==================== Date Navigation ====================
+
+    async function updateDateDisplay() {
+      const dateText = document.getElementById('dateText');
+      const dateStatus = document.getElementById('dateStatus');
+      const nextDayBtn = document.getElementById('nextDayBtn');
+
+      dateText.textContent = formatDate(currentDate);
+
+      // Remove status text - no more "(Viewing past)"
+      dateStatus.textContent = '';
+
+      // Disable next button only if viewing today
+      if (isToday(currentDate)) {
+        nextDayBtn.disabled = true;
+      } else {
+        nextDayBtn.disabled = false;
+      }
+
+      // Sync data from backend before rendering
+      const dateStr = formatDateISO(currentDate);
+      await syncDataFromBackend(dateStr);
+
+      renderAllCards();
+    }
+
+    async function changeDate(days) {
+      const newDate = new Date(currentDate);
+      newDate.setDate(currentDate.getDate() + days);
+
+      if (!isFuture(newDate)) {
+        currentDate = newDate;
+        await updateDateDisplay();
+      }
+    }
+
+    function toggleDatePicker() {
+      const picker = document.getElementById('datePicker');
+      const isActive = picker.classList.contains('active');
+
+      if (isActive) {
+        picker.classList.remove('active');
+      } else {
+        pickerDate = new Date(currentDate);
+        renderDatePicker();
+        picker.classList.add('active');
+      }
+    }
+
+    function changePickerMonth(months) {
+      pickerDate.setMonth(pickerDate.getMonth() + months);
+      renderDatePicker();
+    }
+
+    function renderDatePicker() {
+      const pickerMonth = document.getElementById('pickerMonth');
+      const pickerGrid = document.getElementById('pickerGrid');
+
+      pickerMonth.textContent = pickerDate.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric'
+      });
+
+      const year = pickerDate.getFullYear();
+      const month = pickerDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      let html = '';
+
+      ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+        html += `<div class="date-picker-day">${day}</div>`;
+      });
+
+      for (let i = 0; i < firstDay; i++) {
+        html += `<div class="date-picker-date empty"></div>`;
+      }
+
+      const today = new Date();
+      const selectedDateStr = formatDateISO(currentDate);
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dateStr = formatDateISO(date);
+        const isTodayDate = formatDateISO(date) === formatDateISO(today);
+        const isSelected = dateStr === selectedDateStr;
+        const isFutureDate = isFuture(date);
+
+        let classes = 'date-picker-date';
+        if (isTodayDate) classes += ' today';
+        if (isSelected) classes += ' selected';
+        if (isFutureDate) classes += ' disabled';
+
+        const onclick = isFutureDate ? '' : `onclick="selectDate('${dateStr}')"`;
+
+        html += `<div class="${classes}" ${onclick}>${day}</div>`;
+      }
+
+      pickerGrid.innerHTML = html;
+    }
+
+    async function selectDate(dateStr) {
+      currentDate = parseDate(dateStr);
+      await updateDateDisplay();
+      document.getElementById('datePicker').classList.remove('active');
+    }
+
+    document.addEventListener('click', (e) => {
+      const picker = document.getElementById('datePicker');
+      const dateDisplay = document.getElementById('dateDisplay');
+
+      if (!picker.contains(e.target) && !dateDisplay.contains(e.target)) {
+        picker.classList.remove('active');
+      }
+    });
+
+    // ==================== Data Storage ====================
+
+    // Sync data FROM backend TO localStorage
+    async function syncDataFromBackend(dateStr) {
+      try {
+        // Get logs from backend for current date
+        const response = await fetch('/api/get_logs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user_id: currentUser.id,
+            start_date: dateStr,
+            end_date: dateStr
+          })
+        });
+
+        if (!response.ok) {
+          console.error('Failed to fetch logs from backend');
+          return;
+        }
+
+        const data = await response.json();
+        const logs = data.logs || [];
+
+        // Separate logs by type and store in localStorage
+        const eventLogs = [];
+        const dailyLogs = {};
+        const weeklyLogs = {};
+
+        for (const log of logs) {
+          if (log.type === 'event' && log.d_evt_count > 0) {
+            // For event logs, we need to reconstruct individual events
+            // Since backend only has aggregated data, we'll create placeholder events
+            for (let i = 0; i < log.d_evt_count; i++) {
+              eventLogs.push({
+                symptom_id: log.symptom_id,
+                severity: log.d_evt_sev_max,
+                time: '12:00', // Default time
+                note: '',
+                timestamp: new Date().toISOString(),
+                from_backend: true // Mark as synced from backend
+              });
+            }
+          } else if (log.type === 'daily' && log.d_sev !== null) {
+            dailyLogs[log.symptom_id] = {
+              severity: log.d_sev,
+              notes: '',
+              logged_at: new Date().toISOString(),
+              from_backend: true
+            };
+          } else if (log.type === 'weekly' && log.w_anchor_sev !== null) {
+            weeklyLogs[log.symptom_id] = {
+              severity: log.w_anchor_sev,
+              notes: '',
+              logged_at: new Date().toISOString(),
+              from_backend: true
+            };
+          }
+        }
+
+        // Update localStorage with backend data (only if not already manually entered)
+        if (eventLogs.length > 0) {
+          const eventsKey = `events_${currentUser.id}_${dateStr}`;
+          const existingEvents = JSON.parse(localStorage.getItem(eventsKey) || '[]');
+          // Only add backend events if there are no local events
+          if (existingEvents.length === 0) {
+            localStorage.setItem(eventsKey, JSON.stringify(eventLogs));
+          }
+        }
+
+        if (Object.keys(dailyLogs).length > 0) {
+          const dailyKey = `daily_${currentUser.id}_${dateStr}`;
+          const existingDaily = JSON.parse(localStorage.getItem(dailyKey) || '{}');
+          // Merge: keep local entries, add backend entries for missing symptoms
+          for (const [symptomId, data] of Object.entries(dailyLogs)) {
+            if (!existingDaily[symptomId]) {
+              existingDaily[symptomId] = data;
+            }
+          }
+          localStorage.setItem(dailyKey, JSON.stringify(existingDaily));
+        }
+
+        // For weekly logs, we need to get the week range
+        const week = getWeekRange(dateStr);
+        if (Object.keys(weeklyLogs).length > 0) {
+          const weeklyKey = `weekly_${currentUser.id}_${week.start}`;
+          const existingWeekly = JSON.parse(localStorage.getItem(weeklyKey) || '{}');
+          // Merge: keep local entries, add backend entries for missing symptoms
+          for (const [symptomId, data] of Object.entries(weeklyLogs)) {
+            if (!existingWeekly[symptomId]) {
+              existingWeekly[symptomId] = data;
+            }
+          }
+          localStorage.setItem(weeklyKey, JSON.stringify(existingWeekly));
+        }
+
+        console.log('✅ Data synced from backend to localStorage');
+      } catch (error) {
+        console.error('Error syncing data from backend:', error);
+      }
+    }
+
+    // Sync log to backend API
+    async function syncLogToBackend(logEntry) {
+      try {
+        const response = await fetch('/api/save_log', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user_id: currentUser.id,
+            ...logEntry
+          })
+        });
+
+        if (!response.ok) {
+          console.error('Failed to sync log to backend:', response.status, response.statusText);
+          showToast('⚠️ Log saved locally but sync failed');
+          return false;
+        } else {
+          console.log('✅ Log synced to backend:', logEntry.symptom_id, 'Date:', logEntry.date);
+          return true;
+        }
+      } catch (error) {
+        console.error('Error syncing to backend:', error);
+        showToast('⚠️ Log saved locally but sync failed');
+        return false;
+      }
+    }
+
+    function getEventLogs(date, symptomId) {
+      const dateStr = formatDateISO(date);
+      const key = `events_${currentUser.id}_${dateStr}`;
+      const logs = JSON.parse(localStorage.getItem(key) || '[]');
+      return symptomId ? logs.filter(log => log.symptom_id === symptomId) : logs;
+    }
+
+    async function saveEventLog(log) {
+      // Prevent saving logs for future dates
+      if (isFuture(currentDate)) {
+        console.error('Cannot save logs for future dates');
+        showToast('❌ Cannot log future dates');
+        return;
+      }
+
+      const dateStr = formatDateISO(currentDate);
+      const key = `events_${currentUser.id}_${dateStr}`;
+      const logs = JSON.parse(localStorage.getItem(key) || '[]');
+
+      // Save to localStorage (for immediate display on this page)
+      logs.push(log);
+      localStorage.setItem(key, JSON.stringify(logs));
+
+      // Aggregate all events of the same symptom for the day
+      const symptomEvents = logs.filter(l => l.symptom_id === log.symptom_id);
+      const eventCount = symptomEvents.length;
+      const maxSeverity = Math.max(...symptomEvents.map(l => l.severity));
+
+      // Find symptom configuration
+      const symptomConfig = SYMPTOMS_CONFIG.event.find(s => s.id === log.symptom_id);
+
+      // Sync to backend (daily aggregated format)
+      await syncLogToBackend({
+        date: dateStr,
+        symptom_id: log.symptom_id,
+        symptom_name: symptomConfig?.name || log.symptom_id,
+        type: 'event',
+        d_evt_count: eventCount,
+        d_evt_sev_max: maxSeverity,
+        d_sev: null,
+        w_anchor_sev: null
+      });
+    }
+
+    function deleteEventLog(symptomId, index) {
+      const dateStr = formatDateISO(currentDate);
+      const key = `events_${currentUser.id}_${dateStr}`;
+      const allLogs = JSON.parse(localStorage.getItem(key) || '[]');
+      const logs = allLogs.filter(log => log.symptom_id === symptomId);
+      const targetLog = logs[index];
+
+      const globalIndex = allLogs.findIndex(log =>
+        log.symptom_id === targetLog.symptom_id &&
+        log.time === targetLog.time &&
+        log.severity === targetLog.severity &&
+        log.timestamp === targetLog.timestamp
+      );
+
+      if (globalIndex !== -1) {
+        allLogs.splice(globalIndex, 1);
+        localStorage.setItem(key, JSON.stringify(allLogs));
+      }
+    }
+
+    function updateEventLog(symptomId, index, updatedLog) {
+      const dateStr = formatDateISO(currentDate);
+      const key = `events_${currentUser.id}_${dateStr}`;
+      const allLogs = JSON.parse(localStorage.getItem(key) || '[]');
+      const logs = allLogs.filter(log => log.symptom_id === symptomId);
+      const targetLog = logs[index];
+
+      const globalIndex = allLogs.findIndex(log =>
+        log.symptom_id === targetLog.symptom_id &&
+        log.time === targetLog.time &&
+        log.severity === targetLog.severity &&
+        log.timestamp === targetLog.timestamp
+      );
+
+      if (globalIndex !== -1) {
+        allLogs[globalIndex] = updatedLog;
+        localStorage.setItem(key, JSON.stringify(allLogs));
+      }
+    }
+
+    function getDailyLog(date, symptomId) {
+      const dateStr = formatDateISO(date);
+      const key = `daily_${currentUser.id}_${dateStr}`;
+      const logs = JSON.parse(localStorage.getItem(key) || '{}');
+      return logs[symptomId] || null;
+    }
+
+    async function saveDailyLog(symptomId, severity, notes) {
+      // Prevent saving logs for future dates
+      if (isFuture(currentDate)) {
+        console.error('Cannot save logs for future dates');
+        showToast('❌ Cannot log future dates');
+        return;
+      }
+
+      const dateStr = formatDateISO(currentDate);
+      const key = `daily_${currentUser.id}_${dateStr}`;
+      const logs = JSON.parse(localStorage.getItem(key) || '{}');
+
+      // Save to localStorage
+      logs[symptomId] = {
+        severity: severity,
+        notes: notes || '',
+        logged_at: new Date().toISOString()
+      };
+
+      localStorage.setItem(key, JSON.stringify(logs));
+
+      // Find symptom configuration
+      const symptomConfig = SYMPTOMS_CONFIG.daily.find(s => s.id === symptomId);
+
+      // Sync to backend
+      await syncLogToBackend({
+        date: dateStr,
+        symptom_id: symptomId,
+        symptom_name: symptomConfig?.name || symptomId,
+        type: 'daily',
+        d_evt_count: null,
+        d_evt_sev_max: null,
+        d_sev: severity,
+        w_anchor_sev: null
+      });
+    }
+
+    function getWeeklyLog(weekStart, symptomId) {
+      const key = `weekly_${currentUser.id}_${weekStart}`;
+      const logs = JSON.parse(localStorage.getItem(key) || '{}');
+      return logs[symptomId] || null;
+    }
+
+    async function saveWeeklyLog(weekStart, symptomId, severity, notes) {
+      // Prevent saving logs for future dates
+      const weekDate = parseDate(weekStart);
+      if (isFuture(weekDate)) {
+        console.error('Cannot save logs for future dates');
+        showToast('❌ Cannot log future dates');
+        return;
+      }
+
+      const key = `weekly_${currentUser.id}_${weekStart}`;
+      const logs = JSON.parse(localStorage.getItem(key) || '{}');
+
+      // Save to localStorage (for immediate display on this page)
+      logs[symptomId] = {
+        severity: severity,
+        notes: notes || '',
+        logged_at: new Date().toISOString()
+      };
+
+      localStorage.setItem(key, JSON.stringify(logs));
+
+      // Find symptom configuration
+      const symptomConfig = SYMPTOMS_CONFIG.weekly.find(s => s.id === symptomId);
+
+      // Sync to backend (weekly anchor format)
+      await syncLogToBackend({
+        date: weekStart,  // Use week start date
+        symptom_id: symptomId,
+        symptom_name: symptomConfig?.name || symptomId,
+        type: 'weekly',
+        d_evt_count: null,
+        d_evt_sev_max: null,
+        d_sev: null,
+        w_anchor_sev: severity
+      });
+    }
+
+    // ==================== Rendering ====================
+
+    function renderEventCards() {
+      const container = document.getElementById('eventCards');
+
+      container.innerHTML = SYMPTOMS_CONFIG.event.map(symptom => {
+        const logs = getEventLogs(currentDate, symptom.id);
+        const isExpanded = expandedCards.has(`event_${symptom.id}`);
+
+        let html = `
+          <div class="small-card ${logs.length > 0 ? 'logged' : ''} ${isExpanded ? 'expanded' : ''}">
+            <div class="card-header" onclick="toggleCard('event', '${symptom.id}')" style="cursor: pointer;">
+              <div class="card-icon">${ICONS[symptom.icon](symptom.iconColor)}</div>
+              <div class="card-title-area">
+                <div class="card-title">${symptom.name}</div>
+                <span class="category-badge ${symptom.category}">${symptom.category}</span>
+              </div>
+            </div>
+            <div class="card-content">
+        `;
+
+        // Show preview or empty state
+        if (logs.length > 0) {
+          html += `<div class="card-info">${logs.length} event${logs.length > 1 ? 's' : ''} today</div>`;
+        } else {
+          html += `<div class="card-info" style="color: var(--ink-muted);">No events today</div>`;
+        }
+
+        // Show event list if expanded
+        if (isExpanded && logs.length > 0) {
+          html += `<div class="event-list">`;
+          logs.forEach((log, index) => {
+            const notesText = (log.note && log.note.trim()) ? log.note : '';
+            html += `<div class="event-item" onclick="editEvent('${symptom.id}', ${index})">
+              <div class="event-content">
+                <span class="event-time">${log.time}</span>
+                <span class="event-severity">${SEVERITY_LABELS[log.severity]}</span>
+                <span class="event-notes">${notesText}</span>
+              </div>
+              <button class="btn-delete btn-delete-no-border" onclick="event.stopPropagation(); deleteEvent('${symptom.id}', ${index})">${ICONS.trash('#9e9e9e')}</button>
+            </div>`;
+          });
+          html += `</div>`;
+        }
+
+        // Button layout depends on whether there are events
+        if (logs.length > 0) {
+          // Has events: show two buttons side by side
+          html += `<div class="button-group" style="margin-top: auto;">`;
+          html += `<button class="btn btn-primary" onclick="event.stopPropagation(); openEventModal('${symptom.id}')">Log Event</button>`;
+          if (!isExpanded) {
+            html += `<button class="btn-outline" onclick="event.stopPropagation(); toggleCard('event', '${symptom.id}')">View Details</button>`;
+          } else {
+            html += `<button class="btn-outline" onclick="event.stopPropagation(); toggleCard('event', '${symptom.id}')">Hide Details</button>`;
+          }
+          html += `</div>`;
+        } else {
+          // No events: show single centered button
+          html += `<button class="btn btn-primary" onclick="event.stopPropagation(); openEventModal('${symptom.id}')" style="width: 100%; margin-top: auto;">Log Event</button>`;
+        }
+
+        html += `
+            </div>
+          </div>
+        `;
+        return html;
+      }).join('');
+    }
+
+    function renderDailyCards() {
+      const container = document.getElementById('dailyCards');
+
+      container.innerHTML = SYMPTOMS_CONFIG.daily.map(symptom => {
+        const log = getDailyLog(currentDate, symptom.id);
+        const isEditing = expandedCards.has(`daily_${symptom.id}`);
+
+        let html = `
+          <div class="small-card ${log ? 'logged' : ''} ${isEditing ? 'editing' : ''}">
+            <div class="card-header">
+              <div class="card-icon">${ICONS[symptom.icon](symptom.iconColor)}</div>
+              <div class="card-title-area">
+                <div class="card-title">${symptom.name}</div>
+                <span class="category-badge ${symptom.category}">${symptom.category}</span>
+              </div>
+            </div>
+            <div class="card-content">
+        `;
+
+        if (log && !isEditing) {
+          const notesText = (log.notes && log.notes.trim()) ? log.notes : '';
+          html += `
+            <div class="card-status">
+              <span class="severity-text">${SEVERITY_LABELS[log.severity]}</span>
+            </div>
+          `;
+
+          if (notesText) {
+            html += `
+            <div class="notes">${notesText}</div>
+            `;
+          }
+
+          html += `
+            <div class="logged-time">Logged at ${new Date(log.logged_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</div>
+            <div class="button-group" style="margin-top: auto;">
+              <button class="btn-outline" onclick="editDaily('${symptom.id}')" style="flex: 1;">Edit</button>
+              <button class="btn-delete" onclick="deleteDaily('${symptom.id}')" style="width: 40px; height: 40px; border: 2px solid var(--border); border-radius: 20px;">${ICONS.trash('#9e9e9e')}</button>
+            </div>
+          `;
+        } else if (!log && !isEditing) {
+          html += `
+            <div class="card-info" style="color: var(--ink-muted);">No entry today</div>
+            <button class="btn btn-primary" onclick="editDaily('${symptom.id}')" style="width: 100%; margin-top: auto;">Log Entry</button>
+          `;
+        }
+
+        if (isEditing) {
+          const currentSeverity = log ? log.severity : 1;
+          const currentNotes = log ? (log.notes || '') : '';
+          html += `
+            <div class="inline-editor">
+              <div class="severity-selector-container">
+                <div class="severity-selector-label">Severity</div>
+                <div class="severity-selector" id="daily_selector_${symptom.id}">
+                  <div class="severity-dot-item">
+                    <div class="severity-dot" data-value="1" onclick="selectSeverity('daily_${symptom.id}', 1)" onmouseenter="previewSeverity('daily_${symptom.id}', 1)" onmouseleave="clearPreview('daily_${symptom.id}')"></div>
+                    <div class="severity-dot-label">Mild</div>
+                  </div>
+                  <div class="severity-dot-item">
+                    <div class="severity-dot" data-value="2" onclick="selectSeverity('daily_${symptom.id}', 2)" onmouseenter="previewSeverity('daily_${symptom.id}', 2)" onmouseleave="clearPreview('daily_${symptom.id}')"></div>
+                    <div class="severity-dot-label">Moderate</div>
+                  </div>
+                  <div class="severity-dot-item">
+                    <div class="severity-dot" data-value="3" onclick="selectSeverity('daily_${symptom.id}', 3)" onmouseenter="previewSeverity('daily_${symptom.id}', 3)" onmouseleave="clearPreview('daily_${symptom.id}')"></div>
+                    <div class="severity-dot-label">Severe</div>
+                  </div>
+                  <div class="severity-dot-item">
+                    <div class="severity-dot" data-value="4" onclick="selectSeverity('daily_${symptom.id}', 4)" onmouseenter="previewSeverity('daily_${symptom.id}', 4)" onmouseleave="clearPreview('daily_${symptom.id}')"></div>
+                    <div class="severity-dot-label">Very Severe</div>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top: 12px;">
+                <div class="severity-selector-label">Notes (Optional)</div>
+                <input type="text" class="form-input" id="daily_notes_${symptom.id}" maxlength="150" placeholder="Any additional details..." value="${currentNotes}">
+              </div>
+              <div class="editor-actions">
+                <button class="btn btn-secondary" onclick="cancelDaily('${symptom.id}')">Cancel</button>
+                <button class="btn btn-primary" id="daily_save_${symptom.id}" onclick="saveDaily('${symptom.id}')" disabled>Save</button>
+              </div>
+            </div>
+          `;
+        }
+
+        html += `
+            </div>
+          </div>
+        `;
+        return html;
+      }).join('');
+
+      SYMPTOMS_CONFIG.daily.forEach(symptom => {
+        if (expandedCards.has(`daily_${symptom.id}`)) {
+          const log = getDailyLog(currentDate, symptom.id);
+          if (log) {
+            // Editing existing log - set severity and enable Save button
+            currentSeverityValues[`daily_${symptom.id}`] = log.severity;
+            updateDotSelector(`daily_${symptom.id}`, log.severity);
+            const saveBtn = document.getElementById(`daily_save_${symptom.id}`);
+            if (saveBtn) saveBtn.disabled = false;
+          } else {
+            // Creating new log - no default severity and disable Save button
+            delete currentSeverityValues[`daily_${symptom.id}`];
+            updateDotSelector(`daily_${symptom.id}`, 0);
+          }
+        }
+      });
+    }
+
+    function renderWeeklyCards() {
+      const container = document.getElementById('weeklyCards');
+      const weekInfo = document.getElementById('weekInfo');
+
+      const week = getWeekRange(formatDateISO(currentDate));
+      weekInfo.textContent = week.label;
+
+      container.innerHTML = SYMPTOMS_CONFIG.weekly.map(symptom => {
+        const log = getWeeklyLog(week.start, symptom.id);
+        const isEditing = expandedCards.has(`weekly_${symptom.id}`);
+
+        let html = `
+          <div class="small-card ${log ? 'logged' : ''} ${isEditing ? 'editing' : ''}">
+            <div class="card-header">
+              <div class="card-icon">${ICONS[symptom.icon](symptom.iconColor)}</div>
+              <div class="card-title-area">
+                <div class="card-title">${symptom.name}</div>
+                <span class="category-badge ${symptom.category}">${symptom.category}</span>
+              </div>
+            </div>
+            <div class="card-content">
+        `;
+
+        if (log && !isEditing) {
+          const logDate = new Date(log.logged_at);
+          const dayName = logDate.toLocaleDateString('en-US', { weekday: 'long' });
+          const timeStr = logDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+          const notesText = (log.notes && log.notes.trim()) ? log.notes : '';
+
+          html += `
+            <div class="card-status">
+              <span class="severity-text">${SEVERITY_LABELS[log.severity]}</span>
+            </div>
+          `;
+
+          if (notesText) {
+            html += `
+            <div class="notes">${notesText}</div>
+            `;
+          }
+
+          html += `
+            <div class="logged-time">Last updated: ${dayName} ${timeStr}</div>
+            <div class="button-group" style="margin-top: auto;">
+              <button class="btn-outline" onclick="editWeekly('${symptom.id}')" style="flex: 1;">Edit</button>
+              <button class="btn-delete" onclick="deleteWeekly('${symptom.id}')" style="width: 40px; height: 40px; border: 2px solid var(--border); border-radius: 20px;">${ICONS.trash('#9e9e9e')}</button>
+            </div>
+          `;
+        } else if (!log && !isEditing) {
+          html += `
+            <div class="card-info" style="color: var(--ink-muted);">No entry this week</div>
+            <button class="btn btn-primary" onclick="editWeekly('${symptom.id}')" style="width: 100%; margin-top: auto;">Log Entry</button>
+          `;
+        }
+
+        if (isEditing) {
+          const currentSeverity = log ? log.severity : 1;
+          const currentNotes = log ? (log.notes || '') : '';
+          html += `
+            <div class="inline-editor">
+              <div class="severity-selector-container">
+                <div class="severity-selector-label">Severity</div>
+                <div class="severity-selector" id="weekly_selector_${symptom.id}">
+                  <div class="severity-dot-item">
+                    <div class="severity-dot" data-value="1" onclick="selectSeverity('weekly_${symptom.id}', 1)" onmouseenter="previewSeverity('weekly_${symptom.id}', 1)" onmouseleave="clearPreview('weekly_${symptom.id}')"></div>
+                    <div class="severity-dot-label">Mild</div>
+                  </div>
+                  <div class="severity-dot-item">
+                    <div class="severity-dot" data-value="2" onclick="selectSeverity('weekly_${symptom.id}', 2)" onmouseenter="previewSeverity('weekly_${symptom.id}', 2)" onmouseleave="clearPreview('weekly_${symptom.id}')"></div>
+                    <div class="severity-dot-label">Moderate</div>
+                  </div>
+                  <div class="severity-dot-item">
+                    <div class="severity-dot" data-value="3" onclick="selectSeverity('weekly_${symptom.id}', 3)" onmouseenter="previewSeverity('weekly_${symptom.id}', 3)" onmouseleave="clearPreview('weekly_${symptom.id}')"></div>
+                    <div class="severity-dot-label">Severe</div>
+                  </div>
+                  <div class="severity-dot-item">
+                    <div class="severity-dot" data-value="4" onclick="selectSeverity('weekly_${symptom.id}', 4)" onmouseenter="previewSeverity('weekly_${symptom.id}', 4)" onmouseleave="clearPreview('weekly_${symptom.id}')"></div>
+                    <div class="severity-dot-label">Very Severe</div>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top: 12px;">
+                <div class="severity-selector-label">Notes (Optional)</div>
+                <input type="text" class="form-input" id="weekly_notes_${symptom.id}" maxlength="150" placeholder="Any additional details..." value="${currentNotes}">
+              </div>
+              <div class="editor-actions">
+                <button class="btn btn-secondary" onclick="cancelWeekly('${symptom.id}')">Cancel</button>
+                <button class="btn btn-primary" id="weekly_save_${symptom.id}" onclick="saveWeekly('${symptom.id}')" disabled>Save</button>
+              </div>
+            </div>
+          `;
+        }
+
+        html += `
+            </div>
+          </div>
+        `;
+        return html;
+      }).join('');
+
+      SYMPTOMS_CONFIG.weekly.forEach(symptom => {
+        if (expandedCards.has(`weekly_${symptom.id}`)) {
+          const week = getWeekRange(formatDateISO(currentDate));
+          const log = getWeeklyLog(week.start, symptom.id);
+          if (log) {
+            // Editing existing log - set severity and enable Save button
+            currentSeverityValues[`weekly_${symptom.id}`] = log.severity;
+            updateDotSelector(`weekly_${symptom.id}`, log.severity);
+            const saveBtn = document.getElementById(`weekly_save_${symptom.id}`);
+            if (saveBtn) saveBtn.disabled = false;
+          } else {
+            // Creating new log - no default severity and disable Save button
+            delete currentSeverityValues[`weekly_${symptom.id}`];
+            updateDotSelector(`weekly_${symptom.id}`, 0);
+          }
+        }
+      });
+    }
+
+    function renderAllCards() {
+      renderEventCards();
+      renderDailyCards();
+      renderWeeklyCards();
+    }
+
+    // ==================== Event Handlers ====================
+
+    function toggleCard(type, symptomId) {
+      const key = `${type}_${symptomId}`;
+      if (expandedCards.has(key)) {
+        expandedCards.delete(key);
+      } else {
+        expandedCards.add(key);
+      }
+      renderEventCards();
+    }
+
+    function openEventModal(symptomId) {
+      currentEventSymptom = symptomId;
+      currentEditingEvent = null; // Reset editing state
+      const symptom = SYMPTOMS_CONFIG.event.find(s => s.id === symptomId);
+
+      document.getElementById('eventModalTitle').textContent = symptom.name;
+
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('eventTime').value = `${hours}:${minutes}`;
+
+      document.getElementById('eventNotes').value = '';
+
+      // No default severity - all dots empty
+      delete currentSeverityValues['event'];
+      updateDotSelector('event', 0);
+
+      // Disable Save button initially
+      document.getElementById('eventSaveBtn').disabled = true;
+
+      document.getElementById('eventModal').classList.add('active');
+    }
+
+    function editEvent(symptomId, index) {
+      currentEventSymptom = symptomId;
+      currentEditingEvent = { symptomId, index };
+      const symptom = SYMPTOMS_CONFIG.event.find(s => s.id === symptomId);
+      const logs = getEventLogs(currentDate, symptomId);
+      const log = logs[index];
+
+      document.getElementById('eventModalTitle').textContent = symptom.name;
+      document.getElementById('eventTime').value = log.time;
+      document.getElementById('eventNotes').value = log.note || '';
+
+      // Initialize dot selector with event's severity
+      currentSeverityValues['event'] = log.severity;
+      updateDotSelector('event', log.severity);
+
+      // Enable Save button since we have a severity
+      document.getElementById('eventSaveBtn').disabled = false;
+
+      document.getElementById('eventModal').classList.add('active');
+    }
+
+    function closeEventModal() {
+      document.getElementById('eventModal').classList.remove('active');
+      currentEventSymptom = null;
+      currentEditingEvent = null;
+    }
+
+    async function saveEvent() {
+      const severity = currentSeverityValues['event'] || 2;
+      const time = document.getElementById('eventTime').value;
+      const notes = document.getElementById('eventNotes').value;
+
+      if (!time) {
+        alert('Please select a time');
+        return;
+      }
+
+      if (currentEditingEvent) {
+        // Update existing event
+        const log = {
+          symptom_id: currentEventSymptom,
+          severity: severity,
+          time: time,
+          note: notes,
+          timestamp: new Date().toISOString()
+        };
+        updateEventLog(currentEditingEvent.symptomId, currentEditingEvent.index, log);
+        closeEventModal();
+        expandedCards.add(`event_${currentEventSymptom}`);
+        renderEventCards();
+        showToast('✓ Event updated');
+      } else {
+        // Create new event
+        const log = {
+          symptom_id: currentEventSymptom,
+          severity: severity,
+          time: time,
+          note: notes,
+          timestamp: new Date().toISOString()
+        };
+        await saveEventLog(log);
+        closeEventModal();
+        expandedCards.add(`event_${currentEventSymptom}`);
+        renderEventCards();
+        showToast('✓ Event logged');
+      }
+    }
+
+    async function deleteEvent(symptomId, index) {
+      if (confirm('Delete this event?')) {
+        // Delete from localStorage
+        deleteEventLog(symptomId, index);
+
+        // Get remaining events for this symptom
+        const remainingEvents = getEventLogs(currentDate, symptomId);
+        const dateStr = formatDateISO(currentDate);
+
+        // Find symptom configuration
+        const symptomConfig = SYMPTOMS_CONFIG.event.find(s => s.id === symptomId);
+
+        if (remainingEvents.length > 0) {
+          // Re-aggregate remaining events
+          const eventCount = remainingEvents.length;
+          const maxSeverity = Math.max(...remainingEvents.map(e => e.severity));
+
+          // Sync updated aggregation to backend
+          await syncLogToBackend({
+            date: dateStr,
+            symptom_id: symptomId,
+            symptom_name: symptomConfig?.name || symptomId,
+            type: 'event',
+            d_evt_count: eventCount,
+            d_evt_sev_max: maxSeverity,
+            d_sev: null,
+            w_anchor_sev: null
+          });
+        } else {
+          // No remaining events - delete the entire log from backend
+          await fetch('/api/delete_log', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              user_id: currentUser.id,
+              date: dateStr,
+              symptom_id: symptomId,
+              type: 'event'
+            })
+          });
+        }
+
+        renderEventCards();
+        showToast('✓ Event deleted');
+      }
+    }
+
+    function editDaily(symptomId) {
+      expandedCards.add(`daily_${symptomId}`);
+      renderDailyCards();
+    }
+
+    function cancelDaily(symptomId) {
+      expandedCards.delete(`daily_${symptomId}`);
+      renderDailyCards();
+    }
+
+    async function saveDaily(symptomId) {
+      const severity = currentSeverityValues[`daily_${symptomId}`] || 1;
+      const notesInput = document.getElementById(`daily_notes_${symptomId}`);
+      const notes = notesInput ? notesInput.value : '';
+
+      const log = getDailyLog(currentDate, symptomId);
+      await saveDailyLog(symptomId, severity, notes);
+      expandedCards.delete(`daily_${symptomId}`);
+      renderDailyCards();
+      showToast(log ? '✓ Entry updated' : '✓ Entry logged');
+    }
+
+    function editWeekly(symptomId) {
+      expandedCards.add(`weekly_${symptomId}`);
+      renderWeeklyCards();
+    }
+
+    function cancelWeekly(symptomId) {
+      expandedCards.delete(`weekly_${symptomId}`);
+      renderWeeklyCards();
+    }
+
+    async function saveWeekly(symptomId) {
+      const severity = currentSeverityValues[`weekly_${symptomId}`] || 1;
+      const notesInput = document.getElementById(`weekly_notes_${symptomId}`);
+      const notes = notesInput ? notesInput.value : '';
+
+      const week = getWeekRange(formatDateISO(currentDate));
+      const log = getWeeklyLog(week.start, symptomId);
+      await saveWeeklyLog(week.start, symptomId, severity, notes);
+
+      expandedCards.delete(`weekly_${symptomId}`);
+      renderWeeklyCards();
+      showToast(log ? '✓ Entry updated' : '✓ Entry logged');
+    }
+
+    async function deleteDaily(symptomId) {
+      if (confirm('Delete this entry?')) {
+        const dateStr = formatDateISO(currentDate);
+        const key = `daily_${currentUser.id}_${dateStr}`;
+        const logs = JSON.parse(localStorage.getItem(key) || '{}');
+        delete logs[symptomId];
+        localStorage.setItem(key, JSON.stringify(logs));
+
+        // Sync deletion to backend
+        await fetch('/api/delete_log', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user_id: currentUser.id,
+            date: dateStr,
+            symptom_id: symptomId,
+            type: 'daily'
+          })
+        });
+
+        renderDailyCards();
+        showToast('✓ Entry deleted');
+      }
+    }
+
+    async function deleteWeekly(symptomId) {
+      if (confirm('Delete this entry?')) {
+        const week = getWeekRange(formatDateISO(currentDate));
+        const key = `weekly_${currentUser.id}_${week.start}`;
+        const logs = JSON.parse(localStorage.getItem(key) || '{}');
+        delete logs[symptomId];
+        localStorage.setItem(key, JSON.stringify(logs));
+
+        // Sync deletion to backend
+        await fetch('/api/delete_log', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user_id: currentUser.id,
+            date: week.start,
+            symptom_id: symptomId,
+            type: 'weekly'
+          })
+        });
+
+        renderWeeklyCards();
+        showToast('✓ Entry deleted');
+      }
+    }
+
+    // ==================== Severity Selector Functions ====================
+
+    function selectSeverity(type, value) {
+      currentSeverityValues[type] = value;
+      updateDotSelector(type, value);
+
+      // Enable Save button when severity is selected
+      if (type === 'event') {
+        const saveBtn = document.getElementById('eventSaveBtn');
+        if (saveBtn) saveBtn.disabled = false;
+      } else if (type.startsWith('daily_')) {
+        const symptomId = type.replace('daily_', '');
+        const saveBtn = document.getElementById(`daily_save_${symptomId}`);
+        if (saveBtn) saveBtn.disabled = false;
+      } else if (type.startsWith('weekly_')) {
+        const symptomId = type.replace('weekly_', '');
+        const saveBtn = document.getElementById(`weekly_save_${symptomId}`);
+        if (saveBtn) saveBtn.disabled = false;
+      }
+    }
+
+    function previewSeverity(type, value) {
+      const selectorContainer = type === 'event'
+        ? document.getElementById('eventSeveritySelector')
+        : document.getElementById(type.replace('_', '_selector_'));
+
+      if (!selectorContainer) return;
+
+      const dots = selectorContainer.querySelectorAll('.severity-dot');
+      dots.forEach((dot) => {
+        const dotValue = parseInt(dot.dataset.value);
+        if (dotValue <= value && dotValue !== (currentSeverityValues[type] || 0)) {
+          if (dotValue <= (currentSeverityValues[type] || 0)) {
+            // Already filled, don't change
+          } else {
+            dot.classList.add('preview');
+          }
+        }
+      });
+    }
+
+    function clearPreview(type) {
+      const selectorContainer = type === 'event'
+        ? document.getElementById('eventSeveritySelector')
+        : document.getElementById(type.replace('_', '_selector_'));
+
+      if (!selectorContainer) return;
+
+      const dots = selectorContainer.querySelectorAll('.severity-dot');
+      dots.forEach(dot => {
+        dot.classList.remove('preview');
+      });
+    }
+
+    function updateDotSelector(type, value) {
+      const selectorContainer = type === 'event'
+        ? document.getElementById('eventSeveritySelector')
+        : document.getElementById(type.replace('_', '_selector_'));
+
+      if (!selectorContainer) return;
+
+      // Update dots
+      const dots = selectorContainer.querySelectorAll('.severity-dot');
+      dots.forEach((dot) => {
+        const dotValue = parseInt(dot.dataset.value);
+        if (dotValue <= value) {
+          dot.classList.add('filled');
+        } else {
+          dot.classList.remove('filled');
+        }
+        dot.classList.remove('preview');
+      });
+    }
+
+    // ==================== Initialization ====================
+
+    async function init() {
+      loadUserInfo();
+      await updateDateDisplay();
+    }
+
+    init();
+  </script>
+</body>
+</html>

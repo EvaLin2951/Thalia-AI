@@ -1,0 +1,26 @@
+{
+  "user_001": [
+    {
+      "date": "2025-11-17",
+      "symptom_id": "sexual_problems",
+      "symptom_name": "Sexual Problems",
+      "type": "weekly",
+      "d_evt_count": null,
+      "d_evt_sev_max": null,
+      "d_sev": null,
+      "w_anchor_sev": 1,
+      "deleted": false
+    },
+    {
+      "date": "2025-11-20",
+      "symptom_id": "hot_flashes",
+      "symptom_name": "Hot Flashes / Sweating",
+      "type": "event",
+      "d_evt_count": 1,
+      "d_evt_sev_max": 2,
+      "d_sev": null,
+      "w_anchor_sev": null,
+      "deleted": false
+    }
+  ]
+}
