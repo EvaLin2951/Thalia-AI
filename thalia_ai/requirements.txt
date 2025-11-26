@@ -1,30 +1,40 @@
-# Flask Backend
-flask==3.0.0
-flask-cors==4.0.0
-python-dotenv==1.0.0
+# ============================================
+# THALIA AI - Python Package Requirements
+# ============================================
+# Python Version: >=3.9,<3.14
+#
+# Installation:
+#   python3 -m venv venv
+#   source venv/bin/activate  # Windows: venv\Scripts\activate
+#   pip install --upgrade pip
+#   pip install -r requirements.txt
+# ============================================
 
-# PDF Generation
+# Core Web Framework
+Flask==3.1.2
+Flask-Cors==4.0.0
+
+# Environment & Configuration
+python-dotenv==1.2.1
+
+# Database - FIXED: Use official MySQL connector
+mysql-connector-python==9.1.0
+
+# PDF Generation & Image Processing
 reportlab==4.0.7
+Pillow==12.0.0
 
-# RAG Dependencies - Langchain
-langchain==0.1.0
-langchain-google-genai==0.0.6
-langchain-community==0.0.13
-langchain-text-splitters==0.0.1
-langchain-core==0.1.10
+# RAG & AI Dependencies - Langchain
+# Only specify main package, let pip resolve compatible sub-package versions
+langchain==0.3.14
+langchain-google-genai>=2.0.0
+langchain-text-splitters>=0.3.0
 
 # Vector Store
-chromadb==0.4.22
+chromadb==0.5.23
 
-# Google Gemini
-google-generativeai==0.3.2
+# Google Gemini AI
+google-generativeai==0.8.3
 
-# Database (choose one)
-pymysql==1.1.0          # If using rag_sql.py
-PyMySQL[rsa]==1.1.0     # With RSA support
-
-# PDF Processing
-PyMuPDF==1.23.8         # If using rag_local.py
-
-# Optional but recommended
-requests==2.31.0
+# HTTP Client
+requests==2.32.3
